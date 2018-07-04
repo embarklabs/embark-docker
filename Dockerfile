@@ -2,7 +2,7 @@ FROM node:8.11.3-stretch
 
 MAINTAINER Andre Medeiros <andre@status.im>
 
-ENV EMBARK_VERSION=3.1.3 \
+ENV EMBARK_VERSION=3.1.4 \
     GANACHE_VERSION=6.1.4 \
     GETH_VERSION=1.8.11-dea1ce05 \
     IPFS_VERSION=0.4.15
