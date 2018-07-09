@@ -2,7 +2,7 @@ FROM node:8.11.3-stretch
 
 MAINTAINER Andre Medeiros <andre@status.im>
 
-ENV EMBARK_VERSION=3.1.4 \
+ENV EMBARK_VERSION=3.1.5 \
     GANACHE_VERSION=6.1.4 \
     GETH_VERSION=1.8.11-dea1ce05 \
     IPFS_VERSION=0.4.15
@@ -34,9 +34,13 @@ RUN adduser --disabled-password --shell /bin/bash --gecos "" embark \
     && tar -xvzf "go-ipfs_v${IPFS_VERSION}_linux-amd64.tar.gz" \
     && cp go-ipfs/ipfs /usr/local/bin/ipfs \
     && rm -rf go-ipfs "go-ipfs_v${IPFS_VERSION}_linux-amd64.tar.gz" \
-    # Setup ~embark
-    && su - embark -c "mkdir /home/embark/.npm-packages" \
-    && su - embark -c "echo prefix=/home/embark/.npm-packages > /home/embark/.npmrc" \
+    && mkdir /dapp \
+    && chown embark:embark /dapp
+
+USER embark
+
+RUN mkdir /home/embark/.npm-packages \
+    && echo prefix=/home/embark/.npm-packages > /home/embark/.npmrc \
     && for directive in \
       "export NPM_PACKAGES=\$HOME/.npm-packages" \
       "export NODE_PATH=\$NPM_PACKAGES/lib/node_modules:\$NODE_PATH" \
@@ -45,12 +49,16 @@ RUN adduser --disabled-password --shell /bin/bash --gecos "" embark \
       echo ${directive} >> /home/embark/.profile \
       && echo ${directive} >> /home/embark/.bashrc; \
     done \
+    # Ensure we source the updated bashrc
+    && . ~/.bashrc \
     # Install embark and the simulator
-    && su - embark -c "npm install -g embark@${EMBARK_VERSION} ganache-cli@${GANACHE_VERSION}" \
+    && npm install -g "embark@${EMBARK_VERSION}" "ganache-cli@${GANACHE_VERSION}" \
+    # Initialize IPFS
+    && ipfs init \
     # Cleanup build stuff
     && echo "Done"
 
-USER embark
+WORKDIR /dapp
 
 CMD ["embark"]
 
