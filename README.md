@@ -32,7 +32,7 @@ To facilitate the images being found, we tag them with the following rules (as a
 - Tag with `statusim/embark:latest` if `3.1.5` is the latest version.
 - Tag with `statusim/embark:3.1.5`
 - Tag with `statusim/embark:3.1` if `3.1.5` is the highest patch level on `3.1`
-- Tag with `statism/embark:3` if `3.1.5` is the highest minor and patch level on `3`
+- Tag with `statusim/embark:3` if `3.1.5` is the highest minor and patch level on `3`
 
 #### Generating the image
 
