@@ -9,8 +9,9 @@ ENV EMBARK_VERSION=3.1.5 \
 
 # IPFS: 5001 8080
 # Go Ethereum: 30303/tcp 30301/udp 8545
-# Embark: 8000
-EXPOSE 5001 8080 30303/tcp 30301/udp 8545 8000
+# Embark: 8000 8546 8545
+# Swarm: 8500
+EXPOSE 5001 8080 30303/tcp 30301/udp 8545 8546 8000 8500
 
 RUN adduser --disabled-password --shell /bin/bash --gecos "" embark \
     # Install geth

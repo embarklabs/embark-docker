@@ -1,0 +1,73 @@
+#!/usr/bin/env ruby
+require 'json'
+require 'net/http'
+require 'rubygems'
+
+class CLI
+  def run
+    puts 'Building latest' if latest?
+    puts "Tags: #{ tags_for_embark_version.join(', ') }"
+
+    command = ['docker', 'build', '.']
+    tags_for_embark_version.each { |tag| command << "-t=statusim/embark:#{tag}" }
+
+    system(command.join(' '))
+
+    push_to_registry if ARGV.include?('--release')
+  end
+
+  private
+
+  def push_to_registry
+    tags_for_embark_version.each do |tag|
+      command = ['docker', 'push', "statusim/embark:#{tag}"]
+      system(command.join(' '))
+    end
+  end
+
+  def embark_versions
+    embark_versions ||= begin
+                          package_info['time'].keys.map do |v|
+                            Gem::Version.new(v) rescue nil
+                          end.compact.select { |v| v < Gem::Version.new('7.0.0') }
+                        end
+  end
+
+  def package_info
+    package_info ||= begin
+                       json = Net::HTTP.get('registry.npmjs.org', '/embark')
+                       JSON.parse(json)
+                     end
+  end
+
+
+  def embark_version
+    embark_version ||= begin
+                         dockerfile_path = File.expand_path('../../Dockerfile', __FILE__)
+                         dockerfile = File.open(dockerfile_path, 'r').read
+                         Gem::Version.new(dockerfile.match(/EMBARK_VERSION=([0-9.]*)/)[1])
+                       end
+  end
+
+  def latest?
+    package_info['dist-tags']['latest'] == embark_version.to_s
+  end
+
+  def tags_for_embark_version
+    tags = []
+    tags << 'latest' if latest?
+    tags << embark_version
+
+    # Version being X.Y.Z, figure out if we're the largest X.Y
+    same_minor_versions = embark_versions.select { |ev| ev.segments[0..1] == embark_version.segments[0..1] }.sort
+    tags << embark_version.segments[0..1].join('.') if embark_version == same_minor_versions.last
+
+    # Version being X.Y.Z, figure out if we're the latest X
+    same_major_versions = embark_versions.select { |ev| ev.segments[0] == embark_version.segments[0] }.sort
+    tags << embark_version.segments[0].to_s if embark_version == same_major_versions.last
+
+    tags
+  end
+end
+
+CLI.new.run
