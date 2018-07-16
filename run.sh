@@ -76,6 +76,7 @@ run_embark_docker () {
            -p 8545:8545 \
            -p 8546:8546 \
            -p 8555:8555 \
+           -p 8556:8556 \
            -p 30301:30301/udp \
            -p 30303:30303 \
            -v "$EMBARK_DOCKER_MOUNT_DIR":/dapp \
