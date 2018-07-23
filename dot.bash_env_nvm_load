@@ -1,0 +1,26 @@
+_nvm_unload
+_denac
+unset npm_config_prefix
+unset NPM_CONFIG_PREFIX
+export PATH=$_PATH
+
+. /home/embark/.nvm/nvm.sh &> /dev/null
+
+if [[ (-z $(nvm alias default)) && ($1 != "no-auto-lts") ]]; then
+    case $- in
+        *i*) nvm install --lts;;
+        *) nvm install --lts &> /dev/null;;
+    esac
+    local auto_lts=
+fi
+
+case $- in
+    *i*) npm_completion;;
+esac
+
+if [[ (! -v auto_lts) \
+          && ($(which node) = "/home/embark/.nvm/versions/"*) ]]; then
+    case $- in
+        *i*) echo "Now using NVM node $(node --version) (npm v$(npm --version))";;
+    esac
+fi
