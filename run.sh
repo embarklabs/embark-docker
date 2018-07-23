@@ -64,8 +64,10 @@ run_embark_docker () {
         fi
     fi
 
-    local EMBARK_DOCKER_TAG="${EMBARK_DOCKER_TAG:-latest}"
-    local EMBARK_DOCKER_MOUNT_DIR="${EMBARK_DOCKER_MOUNT_DIR:-$(pwd)}"
+    local EMBARK_DOCKER_MOUNT_SOURCE=${EMBARK_DOCKER_MOUNT_DIR:-$(pwd)}
+    local EMBARK_DOCKER_MOUNT_TARGET=${EMBARK_DOCKER_MOUNT_DIR:-/dapp}
+    local EMBARK_DOCKER_IMAGE=${EMBARK_DOCKER_IMAGE:-statusim/embark}
+    local EMBARK_DOCKER_TAG=${EMBARK_DOCKER_TAG:-latest}
 
     docker run \
            -it \
@@ -79,8 +81,8 @@ run_embark_docker () {
            -p 8556:8556 \
            -p 30301:30301/udp \
            -p 30303:30303 \
-           -v "$EMBARK_DOCKER_MOUNT_DIR":/dapp \
-           statusim/embark:"$EMBARK_DOCKER_TAG" \
+           -v ${EMBARK_DOCKER_MOUNT_SOURCE}:${EMBARK_DOCKER_MOUNT_TARGET} \
+           ${EMBARK_DOCKER_IMAGE}:${EMBARK_DOCKER_TAG} \
            "$@"
 
     local docker_exit_status=$?
