@@ -103,7 +103,8 @@ RUN mkdir -p .npm-packages \
              .local/nodeenv \
     && . .bash_env \
     && pip install --user nodeenv==${NODEENV_VERSION} \
-    && git clone --branch ${NVM_VERSION} --depth 1 \
+    && git clone --branch ${NVM_VERSION} \
+                 --depth 1 \
                  https://github.com/creationix/nvm.git .nvm 2> /dev/null \
     && npm install -g "embark@${EMBARK_VERSION}" \
                       "ganache-cli@${GANACHE_VERSION}" \
