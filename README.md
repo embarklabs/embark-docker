@@ -1,5 +1,40 @@
 # Embark for Docker
 
+## Quick start
+
+In a Bash shell:
+``` shell
+source <(curl 'https://raw.githubusercontent.com/embark-framework/embark-docker/master/run.sh')
+run_embark_docker embark demo
+cd embark_demo
+run_embark_docker
+```
+
+With overrides:
+
+``` shell
+export EMBARK_DOCKER_EXTRA_RUN_OPTS='--rm'
+export EMBARK_DOCKER_IMAGE=statusim/embark
+export EMBARK_DOCKER_TAG=custom
+export EMBARK_DOCKERFILE='https://github.com/embark-framework/embark-docker.git#some/branch'
+export EMBARK_VERSION='embark-framework/embark#/features/branch'
+export NODE_TAG=10.7.0
+export RUNNER='https://raw.githubusercontent.com/embark-framework/embark-docker/some/branch/run.sh'
+
+docker build \
+    -t $EMBARK_DOCKER_IMAGE:$EMBARK_DOCKER_TAG
+    --build-arg EMBARK_VERSION=$EMBARK_VERSION
+    --build-arg NODE_TAG=$NODE_TAG
+    $EMBARK_DOCKERFILE
+
+source <(curl $RUNNER)
+run_embark_docker embark demo
+cd embark_demo
+run_embark_docker
+```
+
+Review the [Dockerfile](https://github.com/embark-framework/embark-docker/blob/master/Dockerfile) and [run.sh](https://github.com/embark-framework/embark-docker/blob/master/run.sh#L66-L70) for the full lists of possible overrides.
+
 ## Updating versions
 
 * Open `Dockerfile`
