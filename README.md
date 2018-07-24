@@ -3,9 +3,7 @@
 ## Updating versions
 
 * Open `Dockerfile`
-* On the `ENV` directive, update necessary versions.
-
-An exception to this is the NodeJS version, which needs to be updated in the `FROM` directive instead.
+* On the `ARG` directives, update necessary versions.
 
 ## Building
 
