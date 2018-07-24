@@ -9,7 +9,7 @@ An exception to this is the NodeJS version, which needs to be updated in the `FR
 
 ## Building
 
-Building requires Docker to be installed on your local machine. 
+Building requires Docker to be installed on your local machine.
 
 ### Scripted
 
