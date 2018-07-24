@@ -1,7 +1,0 @@
-if type nvm &> /dev/null; then
-    nvm unload
-fi
-
-export npm_config_prefix=$_npm_bak_config_prefix
-export NPM_CONFIG_PREFIX=$npm_config_prefix
-export PATH=$__PATH

@@ -1,0 +1,2 @@
+unset npm_config_prefix
+unset NPM_CONFIG_PREFIX

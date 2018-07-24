@@ -1,0 +1,2 @@
+export npm_config_prefix=$embark_docker_embark_user_npm_bak_config_prefix
+export NPM_CONFIG_PREFIX=$npm_config_prefix
