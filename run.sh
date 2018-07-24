@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-unset run_embark_docker
-
 run_embark_docker () {
     local oldopts=""
     case $- in
