@@ -1,13 +1,13 @@
 # multi-stage builder images
 # ------------------------------------------------------------------------------
 
-FROM node:8.11.3-stretch as builder-base
+ARG NODE_TAG=8.11.3-stretch
+FROM node:${NODE_TAG} as builder-base
 
 # ------------------------------------------------------------------------------
 
 FROM builder-base as builder-geth
-ARG GETH_VERSION
-ENV GETH_VERSION=${GETH_VERSION:-1.8.11-dea1ce05}
+ARG GETH_VERSION=1.8.11-dea1ce05
 RUN export url="https://gethstore.blob.core.windows.net/builds" \
     && export platform="geth-alltools-linux-amd64" \
     && curl -fsSLO --compressed "${url}/${platform}-${GETH_VERSION}.tar.gz" \
@@ -17,8 +17,7 @@ RUN export url="https://gethstore.blob.core.windows.net/builds" \
 # ------------------------------------------------------------------------------
 
 FROM builder-base as builder-ipfs
-ARG IPFS_VERSION
-ENV IPFS_VERSION=${IPFS_VERSION:-0.4.15}
+ARG IPFS_VERSION=0.4.15
 RUN export url="https://dist.ipfs.io/go-ipfs" \
     && export ver="v${IPFS_VERSION}/go-ipfs_v${IPFS_VERSION}" \
     && export platform="linux-amd64" \
@@ -28,8 +27,7 @@ RUN export url="https://dist.ipfs.io/go-ipfs" \
 # ------------------------------------------------------------------------------
 
 FROM builder-base as builder-micro
-ARG MICRO_VERSION
-ENV MICRO_VERSION=${MICRO_VERSION:-1.4.0}
+ARG MICRO_VERSION=1.4.0
 RUN export url="https://github.com/zyedidia/micro/releases/download" \
     && export ver="v${MICRO_VERSION}/micro-${MICRO_VERSION}" \
     && export platform="linux64" \
@@ -39,8 +37,7 @@ RUN export url="https://github.com/zyedidia/micro/releases/download" \
 # ------------------------------------------------------------------------------
 
 FROM builder-base as builder-suexec
-ARG SUEXEC_VERSION
-ENV SUEXEC_VERSION=${SUEXEC_VERSION:-v0.2}
+ARG SUEXEC_VERSION=v0.2
 RUN git clone --branch ${SUEXEC_VERSION} \
               --depth 1 \
               https://github.com/ncopa/su-exec.git 2> /dev/null \
@@ -80,16 +77,8 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && python get-pip.py \
     && rm get-pip.py
 ENV LANG=${__LANG:-en_US.${__CODESET:-UTF-8}}
-
-ARG EMBARK_VERSION
-ARG GANACHE_VERSION
-ARG NODEENV_VERSION
-ARG NVM_VERSION
-ENV EMBARK_VERSION=${EMBARK_VERSION:-3.1.5} \
-    GANACHE_VERSION=${GANACHE_VERSION:-6.1.4} \
-    NODEENV_VERSION=${NODEENV_VERSION:-1.3.2} \
-    NVM_VERSION=${NVM_VERSION:-v0.33.11}
 COPY --from=builder-ipfs /go-ipfs/ipfs /usr/local/bin/
+
 USER embark
 SHELL ["/bin/bash", "-c"]
 WORKDIR /home/embark
@@ -99,6 +88,10 @@ COPY .bash_env \
      .bashrc \
      .npmrc \
      ./
+ARG EMBARK_VERSION=3.1.5
+ARG GANACHE_VERSION=6.1.4
+ARG NODEENV_VERSION=1.3.2
+ARG NVM_VERSION=v0.33.11
 RUN mkdir -p .npm-packages \
              .local/nodeenv \
     && . .bash_env \
