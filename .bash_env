@@ -16,7 +16,6 @@ export PATH=$embark_docker_embark_user_PATH_with_NPM
 nac () {
     local txtbld=$(tput bold)
     local txtrst=$(tput sgr0)
-    local bldcyn=${txtbld}$(tput setaf 6)
     local bldred=${txtbld}$(tput setaf 1)
     local ERROR=${bldred}ERROR${txtrst}
     if [[ -z "$1" ]]; then
