@@ -1,102 +1,135 @@
-FROM node:8.11.3-stretch
+# multi-stage builder images
+# ------------------------------------------------------------------------------
 
-MAINTAINER Andre Medeiros <andre@status.im>
+FROM node:8.11.3-stretch as builder-base
 
-# Embark: 8000 8545 8546
-# Go Ethereum: 30301/udp 30303 8545 8546 (when proxied: 8555 8556)
-# IPFS: 5001 8080
-# Swarm: 8500
-EXPOSE 5001 8000 8080 8500 8545 8546 8555 8556 30301/udp 30303
+# ------------------------------------------------------------------------------
 
-ARG SUEXEC_VERSION
-ENV SUEXEC_VERSION=${SUEXEC_VERSION:-v0.2}
-# Install su-exec
-RUN cd /tmp \
-    && git clone --branch ${SUEXEC_VERSION} --depth 1 \
-       https://github.com/ncopa/su-exec.git 2> /dev/null \
-    && cd su-exec \
-    && make \
-    && cp su-exec /usr/local/bin/ \
-    && cd .. \
-    && rm -rf su-exec
-
+FROM builder-base as builder-geth
 ARG GETH_VERSION
 ENV GETH_VERSION=${GETH_VERSION:-1.8.11-dea1ce05}
-# Install geth
-RUN curl -fsSLO --compressed "https://gethstore.blob.core.windows.net/builds/geth-alltools-linux-amd64-${GETH_VERSION}.tar.gz" \
-    && tar -xvzf "geth-alltools-linux-amd64-${GETH_VERSION}.tar.gz" \
-    && for geth_tool in \
-      abigen \
-      bootnode \
-      evm \
-      geth \
-      puppeth \
-      rlpdump \
-      swarm \
-      wnode \
-    ; do \
-      cp "geth-alltools-linux-amd64-${GETH_VERSION}/${geth_tool}" "/usr/local/bin/${geth_tool}"; \
-    done \
-    && rm -rf "geth-alltools-linux-amd64-${GETH_VERSION}*"
+RUN export url="https://gethstore.blob.core.windows.net/builds" \
+    && export platform="geth-alltools-linux-amd64" \
+    && curl -fsSLO --compressed "${url}/${platform}-${GETH_VERSION}.tar.gz" \
+    && tar -xvzf geth-alltools* \
+    && rm geth-alltools*/COPYING
 
+# ------------------------------------------------------------------------------
+
+FROM builder-base as builder-ipfs
 ARG IPFS_VERSION
 ENV IPFS_VERSION=${IPFS_VERSION:-0.4.15}
-# Install ipfs
-RUN curl -fsSLO --compressed "https://dist.ipfs.io/go-ipfs/v${IPFS_VERSION}/go-ipfs_v${IPFS_VERSION}_linux-amd64.tar.gz" \
-    && tar -xvzf "go-ipfs_v${IPFS_VERSION}_linux-amd64.tar.gz" \
-    && cp go-ipfs/ipfs /usr/local/bin/ipfs \
-    && rm -rf go-ipfs "go-ipfs_v${IPFS_VERSION}_linux-amd64.tar.gz"
+RUN export url="https://dist.ipfs.io/go-ipfs" \
+    && export ver="v${IPFS_VERSION}/go-ipfs_v${IPFS_VERSION}" \
+    && export platform="linux-amd64" \
+    && curl -fsSLO --compressed "${url}/${ver}_${platform}.tar.gz" \
+    && tar -xvzf go-ipfs*
 
-# Install pip
-RUN curl -fsSLO --compressed "https://bootstrap.pypa.io/get-pip.py" \
+# ------------------------------------------------------------------------------
+
+FROM builder-base as builder-micro
+ARG MICRO_VERSION
+ENV MICRO_VERSION=${MICRO_VERSION:-1.4.0}
+RUN export url="https://github.com/zyedidia/micro/releases/download" \
+    && export ver="v${MICRO_VERSION}/micro-${MICRO_VERSION}" \
+    && export platform="linux64" \
+    && curl -fsSLO --compressed "${url}/${ver}-${platform}.tar.gz" \
+    && tar -xvzf micro-${MICRO_VERSION}*
+
+# ------------------------------------------------------------------------------
+
+FROM builder-base as builder-suexec
+ARG SUEXEC_VERSION
+ENV SUEXEC_VERSION=${SUEXEC_VERSION:-v0.2}
+RUN git clone --branch ${SUEXEC_VERSION} \
+              --depth 1 \
+              https://github.com/ncopa/su-exec.git 2> /dev/null \
+    && cd su-exec \
+    && make
+
+# final image
+# ------------------------------------------------------------------------------
+
+FROM builder-base
+
+LABEL maintainer="Andre Medeiros <andre@status.im>"
+
+ARG __CODESET
+ARG __LANG
+ARG __LANGUAGE
+ARG __LC_ALL
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update \
+    && apt-get install -y locales \
+    && export __CODESET=${__CODESET:-UTF-8} \
+    && export __LANG=${__LANG:-en_US.$__CODESET} \
+    && export __LANGUAGE=${__LANGUAGE:-en_US:en} \
+    && export __LC_ALL=${__LC_ALL:-en_US.$__CODESET} \
+    && sed -i \
+           -e "s/# ${__LANG} ${__CODESET}/${__LANG} ${__CODESET}/" \
+           /etc/locale.gen \
+    && locale-gen --purge "${__LANG}" \
+    && dpkg-reconfigure locales \
+    && update-locale LANG=${__LANG} LANGUAGE=${__LANGUAGE} LC_ALL=${__LC_ALL} \
+    && unset DEBIAN_FRONTEND \
+    && rm -rf /var/lib/apt/lists/* \
+    && adduser --disabled-password --shell /bin/bash --gecos "" embark \
+    && mkdir -p /dapp \
+    && chown embark:embark /dapp \
+    && curl -fsSLO --compressed "https://bootstrap.pypa.io/get-pip.py" \
     && python get-pip.py \
     && rm get-pip.py
-
-# Setup unprivileged user
-RUN adduser --disabled-password --shell /bin/bash --gecos "" embark \
-    && mkdir -p /dapp \
-    && mkdir -p /home/embark/.npm-packages \
-    && chown embark:embark /dapp /home/embark/.npm-packages
-COPY dot.bash_env /home/embark/.bash_env
-COPY dot.bash_env_nvm_load /home/embark/.bash_env_nvm_load
-COPY dot.bash_env_nvm_unload /home/embark/.bash_env_nvm_unload
-COPY dot.bashrc /home/embark/.bashrc
-COPY dot.npmrc /home/embark/.npmrc
-RUN chown embark:embark /home/embark/.bash_env \
-    && chown embark:embark /home/embark/.bashrc \
-    && chown embark:embark /home/embark/.npmrc
+ENV LANG=${__LANG:-en_US.${__CODESET:-UTF-8}}
 
 ARG EMBARK_VERSION
 ARG GANACHE_VERSION
 ARG NODEENV_VERSION
 ARG NVM_VERSION
-ENV EMBARK_VERSION=${EMBARK_VERSION:-3.1.5}
-ENV GANACHE_VERSION=${GANACHE_VERSION:-6.1.4}
-ENV NODEENV_VERSION=${NODEENV_VERSION:-1.3.2}
-ENV NVM_VERSION=${NVM_VERSION:-v0.33.11}
-# Install tooling and Embark Framework
+ENV EMBARK_VERSION=${EMBARK_VERSION:-3.1.5} \
+    GANACHE_VERSION=${GANACHE_VERSION:-6.1.4} \
+    NODEENV_VERSION=${NODEENV_VERSION:-1.3.2} \
+    NVM_VERSION=${NVM_VERSION:-v0.33.11}
+COPY --from=builder-ipfs /go-ipfs/ipfs /usr/local/bin/
 USER embark
 SHELL ["/bin/bash", "-c"]
 WORKDIR /home/embark
-RUN . ${HOME}/.bash_env \
-    && git clone --branch ${NVM_VERSION} --depth 1 \
-       https://github.com/creationix/nvm.git .nvm 2> /dev/null \
+COPY .bash_env \
+     .bash_env_nvm_load \
+     .bash_env_nvm_unload \
+     .bashrc \
+     .npmrc \
+     ./
+RUN mkdir -p .npm-packages \
+             .local/nodeenv \
+    && . .bash_env \
     && pip install --user nodeenv==${NODEENV_VERSION} \
-    && mkdir -p ${HOME}/.local/nodeenv \
-    && npm install -g "ganache-cli@${GANACHE_VERSION}" \
+    && git clone --branch ${NVM_VERSION} --depth 1 \
+                 https://github.com/creationix/nvm.git .nvm 2> /dev/null \
     && npm install -g "embark@${EMBARK_VERSION}" \
-    # Initialize IPFS
+                      "ganache-cli@${GANACHE_VERSION}" \
     && ipfs init \
     && ipfs config --json Addresses.API '"/ip4/0.0.0.0/tcp/5001"' \
     && ipfs config --json Addresses.Gateway '"/ip4/0.0.0.0/tcp/8080"' \
     && ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]' \
     && ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["GET", "POST", "PUT"]'
 
-# Setup entrypoint and default working directory
 USER root
 SHELL ["/bin/sh", "-c"]
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+WORKDIR /
+COPY docker-entrypoint.sh \
+     user-entrypoint.sh \
+     install-extras.sh \
+     /usr/local/bin/
+
+WORKDIR /dapp
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["embark", "run"]
-WORKDIR /dapp
+# Embark: 8000 8545 8546
+# Go Ethereum: 30301/udp 30303 8545 8546 (when proxied: 8555 8556)
+# IPFS: 5001 8080
+# Swarm: 8500
+EXPOSE 5001 8000 8080 8500 8545 8546 8555 8556 30301/udp 30303
+
+COPY --from=builder-geth /geth-alltools* /usr/local/bin/
+COPY --from=builder-micro /micro*/micro /usr/local/bin/
+COPY --from=builder-suexec /su-exec/su-exec /usr/local/bin/
