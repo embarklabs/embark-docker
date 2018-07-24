@@ -62,7 +62,7 @@ run_embark_docker () {
         fi
     fi
 
-    local EMBARK_DOCKER_MOUNT_SOURCE=${EMBARK_DOCKER_MOUNT_DIR:-$(pwd)}
+    local EMBARK_DOCKER_MOUNT_SOURCE=${EMBARK_DOCKER_MOUNT_DIR:-$PWD}
     local EMBARK_DOCKER_MOUNT_TARGET=${EMBARK_DOCKER_MOUNT_DIR:-/dapp}
     local EMBARK_DOCKER_IMAGE=${EMBARK_DOCKER_IMAGE:-statusim/embark}
     local EMBARK_DOCKER_TAG=${EMBARK_DOCKER_TAG:-latest}
