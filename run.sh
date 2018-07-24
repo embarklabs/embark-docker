@@ -80,6 +80,7 @@ run_embark_docker () {
            -p 30301:30301/udp \
            -p 30303:30303 \
            -v ${EMBARK_DOCKER_MOUNT_SOURCE}:${EMBARK_DOCKER_MOUNT_TARGET} \
+           -e "TERM=${TERM}" \
            ${EMBARK_DOCKER_IMAGE}:${EMBARK_DOCKER_TAG} \
            "$@"
 
