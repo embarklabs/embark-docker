@@ -92,6 +92,7 @@ COPY .bash_env \
 ARG EMBARK_VERSION=3.1.5
 ARG GANACHE_VERSION=6.1.4
 ARG NODEENV_VERSION=1.3.2
+ARG NPM_VERSION=6.2.0
 ARG NVM_VERSION=v0.33.11
 RUN mkdir -p .npm-packages \
              .local/nodeenv \
@@ -100,6 +101,7 @@ RUN mkdir -p .npm-packages \
     && git clone --branch ${NVM_VERSION} \
                  --depth 1 \
                  https://github.com/creationix/nvm.git .nvm 2> /dev/null \
+    && npm install -g "npm@${NPM_VERSION}" \
     && npm install -g "embark@${EMBARK_VERSION}" \
                       "ganache-cli@${GANACHE_VERSION}" \
     && ipfs init \
