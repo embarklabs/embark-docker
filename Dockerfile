@@ -76,6 +76,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && curl -fsSLO --compressed "https://bootstrap.pypa.io/get-pip.py" \
     && python get-pip.py \
     && rm get-pip.py
+
 ENV LANG=${__LANG:-en_US.${__CODESET:-UTF-8}}
 COPY --from=builder-ipfs /go-ipfs/ipfs /usr/local/bin/
 
