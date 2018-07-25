@@ -83,7 +83,8 @@ COPY --from=builder-ipfs /go-ipfs/ipfs /usr/local/bin/
 USER embark
 SHELL ["/bin/bash", "-c"]
 WORKDIR /home/embark
-COPY .bash_env \
+COPY --chown=embark:embark \
+     .bash_env \
      .bash_env_nvm_load \
      .bash_env_nvm_unload \
      .bashrc \
