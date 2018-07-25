@@ -69,12 +69,7 @@ run_embark () {
     local EMBARK_DOCKER_IMAGE=${EMBARK_DOCKER_IMAGE:-statusim/embark}
     local EMBARK_DOCKER_TAG=${EMBARK_DOCKER_TAG:-latest}
 
-    local -a cmd=
-    if [[ "$1" = "demo" ]]; then
-        cmd=( $(echo "embark $@") )
-    else
-        cmd=( $(echo "$@") )
-    fi
+    local -a cmd=( "$@" )
     case $1 in
         -V|--version|-h|--help|new|demo|build|run|blockchain|simulator|test|\
             reset|graph|upload|version) cmd=( "embark" "$cmd" );;
