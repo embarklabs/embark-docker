@@ -17,7 +17,7 @@ export EMBARK_DOCKER_EXTRA_RUN_OPTS='--rm'
 export EMBARK_DOCKER_IMAGE=statusim/embark
 export EMBARK_DOCKER_TAG=custom
 export EMBARK_DOCKERFILE='https://github.com/embark-framework/embark-docker.git#some/branch'
-export EMBARK_VERSION='embark-framework/embark#/features/branch'
+export EMBARK_VERSION='embark-framework/embark#features/branch'
 export NODE_TAG=10.7.0
 export RUNNER='https://raw.githubusercontent.com/embark-framework/embark-docker/some/branch/run.sh'
 
