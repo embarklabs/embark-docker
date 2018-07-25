@@ -33,7 +33,11 @@ cd embark_demo
 run_embark
 ```
 
-Review the [Dockerfile](https://github.com/embark-framework/embark-docker/blob/master/Dockerfile) and [run.sh](https://github.com/embark-framework/embark-docker/blob/master/run.sh#L66-L70) for all possible overrides.
+Review the
+[Dockerfile](https://github.com/embark-framework/embark-docker/blob/master/Dockerfile)
+and
+[run.sh](https://github.com/embark-framework/embark-docker/blob/master/run.sh#L66-L70)
+for all possible overrides.
 
 ### Shortcuts
 
@@ -142,16 +146,19 @@ To release, add `--release` as a parameter of the build script.
 
 ### Manually
 
-Building and releasing manually isn't too hard either, but there are a couple steps.
+Building and releasing manually isn't too hard either, but there are a couple
+steps.
 
 #### Tags
 
-To facilitate the images being found, we tag them with the following rules (as an example, the `3.1.5` version will be used.)
+To facilitate the images being found, we tag them with the following rules (as
+an example, the `3.1.5` version will be used.)
 
 - Tag with `statusim/embark:latest` if `3.1.5` is the latest version.
 - Tag with `statusim/embark:3.1.5`
 - Tag with `statusim/embark:3.1` if `3.1.5` is the highest patch level on `3.1`
-- Tag with `statusim/embark:3` if `3.1.5` is the highest minor and patch level on `3`
+- Tag with `statusim/embark:3` if `3.1.5` is the highest minor and patch level
+  on `3`
 
 #### Generating the image
 
@@ -179,7 +186,8 @@ $ ruby script/build --release
 
 ### Manual
 
-Pushing the tags manually implies that the image has been previously built. To push your local images, run:
+Pushing the tags manually implies that the image has been previously built. To
+push your local images, run:
 
 ```
 docker push statusim/embark:version
