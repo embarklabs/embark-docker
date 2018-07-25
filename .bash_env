@@ -83,7 +83,7 @@ nvm_load () {
     alias nvm='__nvm_mask'
     __nvm_mask () {
         case "$*" in
-            unload*) shift 1; __nvm_unload;;
+            unload*) __nvm_unload;;
             *) unalias nvm; nvm "$@"; alias nvm='__nvm_mask';;
         esac
         export NODE_VERSION=$(node --version)
