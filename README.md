@@ -63,17 +63,62 @@ The same is true for the rest of the `embark` commands. To see the full list:
 ``` shell
 run_embark --help
 ```
-``` shell
-run_embark embark run
-```
 
-Other `embark` commands and non-embark commands should be indicated explicitly:
+### Compound commands
+
+A single command with options can be supplied directly:
 
 ``` shell
-run_embark embark version
+run_embark bash
 ```
 ``` shell
 run_embark ps -ef
+```
+
+Compound commands should be passed to `bash -[i]c`:
+
+``` shell
+run_embark bash -c 'exec bash << "SCRIPT"
+
+simple_nodeenv 10.7.0 my_node
+node --version
+echo $(which node)
+npm i -g http-server
+exec http-server -p 10000
+
+SCRIPT
+'
+```
+
+When executing compound commands via `docer exec` in a running embark
+container, `su-exec` and `bash -ic` can be used together:
+
+``` shell
+docker exec -it <container-id> su-exec embark \
+       bash -ic 'exec bash << "SCRIPT"
+
+simple_nodeenv 10.7.0 my_other_node
+npm i -g http-server
+exec http-server -p 10001
+
+SCRIPT
+'
+```
+
+Alternatively, to go non-interactive, manually source the embark user's
+`.bash_env`:
+
+``` shell
+docker exec -it <container-id> su-exec embark \
+       bash -c 'exec bash << "SCRIPT"
+
+. ~/.bash_env
+simple_nodeenv 10.7.0 more_nodez
+npm i -g http-server
+exec http-server -p 10002
+
+SCRIPT
+'
 ```
 
 ## Updating versions
