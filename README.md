@@ -101,8 +101,7 @@ container, `su-exec` and `bash -ic` can be used together:
 docker exec -it <container-id> su-exec embark \
        bash -ic 'exec bash << "SCRIPT"
 
-simple_nodeenv 10.7.0 my_other_node
-npm i -g http-server
+nac my_node
 exec http-server -p 10001
 
 SCRIPT
@@ -117,7 +116,9 @@ docker exec -it <container-id> su-exec embark \
        bash -c 'exec bash << "SCRIPT"
 
 . ~/.bash_env
-simple_nodeenv 10.7.0 more_nodez
+nvm_load no-auto-lts
+nvm install v10.6.0
+echo $(which node)
 npm i -g http-server
 exec http-server -p 10002
 
