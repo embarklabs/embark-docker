@@ -5,9 +5,9 @@
 In a Bash shell:
 ``` shell
 source <(curl 'https://raw.githubusercontent.com/embark-framework/embark-docker/master/run.sh')
-run_embark_docker embark demo
+run_embark demo
 cd embark_demo
-run_embark_docker
+run_embark
 ```
 
 With overrides:
@@ -28,12 +28,41 @@ docker build \
        $EMBARK_DOCKERFILE
 
 source <(curl $RUNNER)
-run_embark_docker embark demo
+run_embark demo
 cd embark_demo
-run_embark_docker
+run_embark
 ```
 
 Review the [Dockerfile](https://github.com/embark-framework/embark-docker/blob/master/Dockerfile) and [run.sh](https://github.com/embark-framework/embark-docker/blob/master/run.sh#L66-L70) for all possible overrides.
+
+### Shortcuts
+
+The following are equivalent:
+
+``` shell
+run_embark demo
+```
+``` shell
+run_embark embark demo
+```
+
+These are also equivlent:
+
+``` shell
+run_embark
+```
+``` shell
+run_embark embark run
+```
+
+Other `embark` commands and non-embark commands should be indicated explicitly:
+
+``` shell
+run_embark embark version
+```
+``` shell
+run_embark ps -ef
+```
 
 ## Updating versions
 

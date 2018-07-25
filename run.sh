@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-run_embark_docker () {
+run_embark () {
     local oldopts=""
     case $- in
         *e*) oldopts="set -e";;
@@ -69,6 +69,13 @@ run_embark_docker () {
     local EMBARK_DOCKER_IMAGE=${EMBARK_DOCKER_IMAGE:-statusim/embark}
     local EMBARK_DOCKER_TAG=${EMBARK_DOCKER_TAG:-latest}
 
+    local -a cmd=
+    if [[ "$1" = "demo" ]]; then
+        cmd=( $(echo "embark $@") )
+    else
+        cmd=( $(echo "$@") )
+    fi
+
     docker run \
            -it \
            -p 5001:5001 \
@@ -85,7 +92,7 @@ run_embark_docker () {
            -e TERM \
            "${EMBARK_DOCKER_EXTRA_RUN_OPTS}" \
            ${EMBARK_DOCKER_IMAGE}:${EMBARK_DOCKER_TAG} \
-           "$@"
+           "${cmd[@]}"
 
     local docker_exit_status=$?
 
@@ -103,5 +110,5 @@ run_embark_docker () {
 }
 
 if [[ "$0" = "$BASH_SOURCE" ]]; then
-    run_embark_docker "$@"
+    run_embark "$@"
 fi
