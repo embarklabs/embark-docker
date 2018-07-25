@@ -37,7 +37,19 @@ Review the [Dockerfile](https://github.com/embark-framework/embark-docker/blob/m
 
 ### Shortcuts
 
-The following are equivalent:
+These are equivlent:
+
+``` shell
+run_embark
+```
+``` shell
+run_embark run
+```
+``` shell
+run_embark embark run
+```
+
+The following are also equivalent:
 
 ``` shell
 run_embark demo
@@ -46,10 +58,10 @@ run_embark demo
 run_embark embark demo
 ```
 
-These are also equivlent:
+The same is true for the rest of the `embark` commands. To see the full list:
 
 ``` shell
-run_embark
+run_embark --help
 ```
 ``` shell
 run_embark embark run
