@@ -33,7 +33,7 @@ cd embark_demo
 run_embark_docker
 ```
 
-Review the [Dockerfile](https://github.com/embark-framework/embark-docker/blob/master/Dockerfile) and [run.sh](https://github.com/embark-framework/embark-docker/blob/master/run.sh#L66-L70) to see all the possible overrides.
+Review the [Dockerfile](https://github.com/embark-framework/embark-docker/blob/master/Dockerfile) and [run.sh](https://github.com/embark-framework/embark-docker/blob/master/run.sh#L66-L70) for all possible overrides.
 
 ## Updating versions
 
