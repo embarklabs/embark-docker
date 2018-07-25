@@ -34,11 +34,12 @@ nac () {
         ____denac
         return 1
     fi
+    export NODE_VERSION=$(node --version)
     alias denac='deactivate_node'
     alias deactivate_node='__denac'
     case $- in
         *i*) __npm_completion \
-                   && echo "Now using NODEENV node $(node --version) (npm v$(npm --version))";;
+                   ; echo "Now using NODEENV node $NODE_VERSION (npm v$(npm --version))";;
     esac
 }
 export -f nac
@@ -67,6 +68,7 @@ ____denac () {
         deactivate_node
     fi
     export PATH=$embark_docker_embark_user_PATH_with_NPM
+    export NODE_VERSION=$(node --version)
 }
 export -f ____denac
 
@@ -84,6 +86,7 @@ nvm_load () {
             unload*) shift 1; __nvm_unload;;
             *) unalias nvm; nvm "$@"; alias nvm='__nvm_mask';;
         esac
+        export NODE_VERSION=$(node --version)
     }
     export -f __nvm_mask
 }
@@ -107,8 +110,9 @@ __nvm_load () {
     esac
     if [[ (! -v auto_lts) \
               && ($(which node) = "${HOME}/.nvm/versions/"*) ]]; then
+        export NODE_VERSION=$(node --version)
         case $- in
-            *i*) echo "Now using NVM node $(node --version) (npm v$(npm --version))";;
+            *i*) echo "Now using NVM node $NODE_VERSION (npm v$(npm --version))";;
         esac
     fi
 }
@@ -117,7 +121,7 @@ export -f __nvm_load
 __nvm_unload () {
     ____nvm_unload
     case $- in
-        *i*) echo "Now using system node $(node --version) (npm v$(npm --version))";;
+        *i*) echo "Now using system node $NODE_VERSION (npm v$(npm --version))";;
     esac
 }
 export -f __nvm_unload
@@ -131,6 +135,7 @@ ____nvm_unload () {
     fi
     export PATH=$embark_docker_embark_user_PATH_with_NPM
     . ${HOME}/.bash_env_nvm_unload
+    export NODE_VERSION=$(node --version)
 }
 export -f ____nvm_unload
 
