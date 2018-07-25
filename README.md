@@ -22,10 +22,10 @@ export NODE_TAG=10.7.0
 export RUNNER='https://raw.githubusercontent.com/embark-framework/embark-docker/some/branch/run.sh'
 
 docker build \
-    -t $EMBARK_DOCKER_IMAGE:$EMBARK_DOCKER_TAG
-    --build-arg EMBARK_VERSION=$EMBARK_VERSION
-    --build-arg NODE_TAG=$NODE_TAG
-    $EMBARK_DOCKERFILE
+       --build-arg EMBARK_VERSION=$EMBARK_VERSION \
+       --build-arg NODE_TAG=$NODE_TAG \
+       -t $EMBARK_DOCKER_IMAGE:$EMBARK_DOCKER_TAG \
+       $EMBARK_DOCKERFILE
 
 source <(curl $RUNNER)
 run_embark_docker embark demo
