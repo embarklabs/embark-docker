@@ -82,7 +82,7 @@ nvm_load () {
     alias nvm_load='nvm'
     alias nvm='__nvm_mask'
     __nvm_mask () {
-        case $* in
+        case "$*" in
             unload*) shift 1; __nvm_unload;;
             *) unalias nvm; nvm "$@"; alias nvm='__nvm_mask';;
         esac
@@ -142,9 +142,12 @@ export -f ____nvm_unload
 simple_nodeenv () {
     pushd $PWD &> /dev/null
     cd ${HOME}/.local/nodeenv
-    nodeenv --prebuilt --node $@
+    nodeenv --prebuilt --node "$@"
+    if [[ $? != 0 ]]; then
+        popd &> /dev/null
+        return 1
+    fi
     popd &> /dev/null
-    unalias nac &> /dev/null
-    nac $2
+    nac "$2"
 }
 export -f simple_nodeenv
