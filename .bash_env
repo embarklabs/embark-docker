@@ -34,6 +34,7 @@ nac () {
         ____denac
         return 1
     fi
+    alias denac='deactivate_node'
     alias deactivate_node='__denac'
     case $- in
         *i*) __npm_completion \
@@ -60,6 +61,7 @@ __denac () {
 export -f __denac
 
 ____denac () {
+    unalias denac &> /dev/null
     unalias deactivate_node &> /dev/null
     if type deactivate_node &> /dev/null; then
         deactivate_node
