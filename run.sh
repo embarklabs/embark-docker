@@ -75,6 +75,10 @@ run_embark () {
     else
         cmd=( $(echo "$@") )
     fi
+    case $1 in
+        -V|--version|-h|--help|new|demo|build|run|blockchain|simulator|test|\
+            reset|graph|upload|version) cmd=( "embark" "$cmd" );;
+    esac
 
     docker run \
            -it \
