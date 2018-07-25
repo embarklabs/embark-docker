@@ -78,7 +78,7 @@ __npm_completion () {
 export -f __npm_completion
 
 nvm_load () {
-    __nvm_load
+    __nvm_load $1
     alias nvm_load='nvm'
     alias nvm='__nvm_mask'
     __nvm_mask () {
