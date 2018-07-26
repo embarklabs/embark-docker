@@ -3,8 +3,8 @@
 run_embark () {
     local oldopts=""
     case $- in
-        *e*) oldopts="set -e";;
-        *) oldopts="set +e";;
+        *e*) oldopts="set -e" ;;
+        *) oldopts="set +e" ;;
     esac
     if [[ $(shopt -po history) = "set -o history" ]]; then
         oldopts="$oldopts; set -o history"
@@ -72,7 +72,7 @@ run_embark () {
     local -a cmd=( "$@" )
     case $1 in
         -V|--version|-h|--help|new|demo|build|run|blockchain|simulator|test|\
-            reset|graph|upload|version) cmd=( "embark" "$cmd" );;
+            reset|graph|upload|version) cmd=( "embark" "$cmd" ) ;;
     esac
 
     docker run \
