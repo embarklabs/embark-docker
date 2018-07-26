@@ -1,0 +1,1 @@
+. ${HOME}/.bash_env
