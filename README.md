@@ -4,7 +4,7 @@
 
 In a Bash shell:
 ``` shell
-source <(curl 'https://raw.githubusercontent.com/embark-framework/embark-docker/master/run.sh')
+source <(curl https://bit.ly/run_embark)
 run_embark demo
 cd embark_demo
 run_embark
