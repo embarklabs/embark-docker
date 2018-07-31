@@ -84,11 +84,11 @@ USER embark
 SHELL ["/bin/bash", "-c"]
 WORKDIR /home/embark
 COPY --chown=embark:embark \
-     .bash_env \
-     .bash_env_nvm_load \
-     .bash_env_nvm_unload \
-     .bashrc \
-     .npmrc \
+     env/.bash_env \
+     env/.bash_env_nvm_load \
+     env/.bash_env_nvm_unload \
+     env/.bashrc \
+     env/.npmrc \
      ./
 ARG EMBARK_VERSION=3.1.5
 ARG GANACHE_VERSION=6.1.4
@@ -114,9 +114,9 @@ RUN mkdir -p .npm-packages \
 USER root
 SHELL ["/bin/sh", "-c"]
 WORKDIR /
-COPY docker-entrypoint.sh \
-     user-entrypoint.sh \
-     install-extras.sh \
+COPY env/docker-entrypoint.sh \
+     env/user-entrypoint.sh \
+     env/install-extras.sh \
      /usr/local/bin/
 
 WORKDIR /dapp
