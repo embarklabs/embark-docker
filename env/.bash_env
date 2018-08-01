@@ -1,5 +1,3 @@
-# need a prompt indicating versions, etc. ... probably install bash-it
-
 unset BASH_ENV
 
 export PATH=${HOME}/.local/bin:$PATH
