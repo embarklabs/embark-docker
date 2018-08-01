@@ -23,6 +23,20 @@ ARG __CODESET
 ARG __LANG
 ARG __LANGUAGE
 ARG __LC_ALL
+SHELL ["/bin/bash", "-c"]
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get update \
+    && apt-get install -y locales \
+    && sed -i \
+           -e "s/# ${__LANG} ${__CODESET}/${__LANG} ${__CODESET}/" \
+           /etc/locale.gen \
+    && locale-gen --purge "${__LANG}" \
+    && dpkg-reconfigure locales \
+    && update-locale LANG=${__LANG} LANGUAGE=${__LANGUAGE} LC_ALL=${__LC_ALL} \
+    && unset DEBIAN_FRONTEND \
+    && rm -rf /var/lib/apt/lists/*
+ENV LANG=${__LANG}
+SHELL ["/bin/sh", "-c"]
 
 # ------------------------------------------------------------------------------
 
@@ -71,21 +85,6 @@ FROM builder-base
 
 LABEL maintainer="Andre Medeiros <andre@status.im>"
 
-RUN export DEBIAN_FRONTEND=noninteractive \
-    && apt-get update \
-    && apt-get install -y locales \
-    && export __CODESET=${__CODESET:-UTF-8} \
-    && export __LANG=${__LANG:-en_US.$__CODESET} \
-    && export __LANGUAGE=${__LANGUAGE:-en_US:en} \
-    && export __LC_ALL=${__LC_ALL:-en_US.$__CODESET} \
-    && sed -i \
-           -e "s/# ${__LANG} ${__CODESET}/${__LANG} ${__CODESET}/" \
-           /etc/locale.gen \
-    && locale-gen --purge "${__LANG}" \
-    && dpkg-reconfigure locales \
-    && update-locale LANG=${__LANG} LANGUAGE=${__LANGUAGE} LC_ALL=${__LC_ALL} \
-    && unset DEBIAN_FRONTEND \
-    && rm -rf /var/lib/apt/lists/* \
     && adduser --disabled-password --shell /bin/bash --gecos "" embark \
 ARG EMBARK_VERSION
 ARG GANACHE_VERSION
