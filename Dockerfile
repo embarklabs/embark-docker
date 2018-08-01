@@ -109,13 +109,19 @@ COPY --chown=embark:embark \
      env/.bashrc \
      env/.npmrc \
      ./
-RUN mkdir -p .npm-packages \
-             .local/nodeenv \
-    && . .bash_env \
+RUN git clone --depth 1 \
+              https://github.com/Bash-it/bash-it.git \
+              .bash_it 2> /dev/null \
+    && export BASH_IT=${HOME}/.bash_it \
+    && . ${BASH_IT}/bash_it.sh \
+    && bash-it enable completion nvm \
+    && mkdir -p .bash_it/custom/themes/nodez \
     && pip install --user nodeenv==${NODEENV_VERSION} \
-    && git clone --branch ${NVM_VERSION} \
+    && mkdir -p .local/nodeenv \
+    && git clone --branch v${NVM_VERSION} \
                  --depth 1 \
-                 https://github.com/creationix/nvm.git .nvm 2> /dev/null \
+                 https://github.com/creationix/nvm.git \
+                 .nvm 2> /dev/null \
     && . .nvm/nvm.sh \
     && nvm install v${NODE_VERSION} \
     && npm install -g "npm@${NPM_VERSION}" \
