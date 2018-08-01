@@ -126,4 +126,4 @@ __versions_export () {
 }
 export -f __versions_export
 
-nvm_load
+nac default

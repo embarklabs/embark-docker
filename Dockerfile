@@ -110,12 +110,15 @@ RUN git clone --depth 1 \
     && mkdir -p .bash_it/custom/themes/nodez \
     && pip install --user nodeenv==${NODEENV_VERSION} \
     && mkdir -p .local/nodeenv \
+    && export PATH=${HOME}/.local/bin:$PATH \
+    && nodeenv --prebuilt \
+               --node ${NODE_VERSION} \
+               .local/nodeenv/default \
     && git clone --branch v${NVM_VERSION} \
                  --depth 1 \
                  https://github.com/creationix/nvm.git \
                  .nvm 2> /dev/null \
-    && . .nvm/nvm.sh \
-    && nvm install v${NODE_VERSION} \
+    && . .local/nodeenv/default/bin/activate \
     && npm install -g "npm@${NPM_VERSION}" \
     && npm install -g "embark@${EMBARK_VERSION}" \
                       "ganache-cli@${GANACHE_VERSION}" \
