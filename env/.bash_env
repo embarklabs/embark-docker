@@ -1,17 +1,8 @@
+# need a prompt indicating versions, etc. ... probably install bash-it
+
 unset BASH_ENV
-# we don't need to run more than once
-if [[ -v embark_docker_embark_user_BASH_ENV ]]; then
-    return
-fi
-export embark_docker_embark_user_BASH_ENV=
 
-export embark_docker_embark_user_npm_bak_config_prefix=${HOME}/.npm-packages
-export npm_config_prefix=$embark_docker_embark_user_npm_bak_config_prefix
-export NPM_CONFIG_PREFIX=$npm_config_prefix
-
-export embark_docker_embark_user_PATH_with_LOCALBIN=${HOME}/.local/bin:$PATH
-export embark_docker_embark_user_PATH_with_NPM=$NPM_CONFIG_PREFIX/bin:$embark_docker_embark_user_PATH_with_LOCALBIN
-export PATH=$embark_docker_embark_user_PATH_with_NPM
+export PATH=${HOME}/.local/bin:$PATH
 
 nac () {
     local txtbld=$(tput bold)
@@ -26,19 +17,18 @@ nac () {
         echo "$ERROR: no \"$1\" environment found in ${HOME}/.local/nodeenv"
         return 1
     fi
-    ____nvm_unload
-    ____denac
-    export PATH=$embark_docker_embark_user_PATH_with_LOCALBIN
+    __nvm_unload
+    __denac
     . ${HOME}/.local/nodeenv/$1/bin/activate
     if [[ $? != 0 ]]; then
-        ____denac
+        __denac
         return 1
     fi
-    export NODE_VERSION=$(node --version)
+    __versions_export
     alias denac='deactivate_node'
     alias deactivate_node='__denac'
     case $- in
-        *i*) __npm_completion; echo "Now using NODEENV node $NODE_VERSION (npm v$(npm --version))" ;;
+        *i*) __npm_completion ;;
     esac
 }
 export -f nac
@@ -53,23 +43,16 @@ export -f __nac
 complete -F __nac nac
 
 __denac () {
-    ____denac
-    case $- in
-        *i*) echo "Now using system node $(node --version) (npm v$(npm --version))" ;;
-    esac
-}
-export -f __denac
-
-____denac () {
     unalias denac &> /dev/null
     unalias deactivate_node &> /dev/null
     if type deactivate_node &> /dev/null; then
         deactivate_node
     fi
-    export PATH=$embark_docker_embark_user_PATH_with_NPM
-    export NODE_VERSION=$(node --version)
+    . ${HOME}/.bash_env_denac
+    unset NODE_VERSION
+    unset NPM_VERSION
 }
-export -f ____denac
+export -f __denac
 
 __npm_completion () {
     . <(npm completion)
@@ -77,65 +60,44 @@ __npm_completion () {
 export -f __npm_completion
 
 nvm_load () {
-    __nvm_load $1
+    __nvm_load
     alias nvm_load='nvm'
     alias nvm='__nvm_mask'
     __nvm_mask () {
         case "$*" in
             unload*) __nvm_unload ;;
-            *) unalias nvm; nvm "$@"; alias nvm='__nvm_mask' ;;
+            *) unalias nvm; nvm "$@"; alias nvm='__nvm_mask'; __versions_export ;;
         esac
-        export NODE_VERSION=$(node --version)
     }
     export -f __nvm_mask
 }
 export -f nvm_load
 
 __nvm_load () {
-    ____nvm_unload
-    ____denac
-    export PATH=$embark_docker_embark_user_PATH_with_LOCALBIN
+    __nvm_unload
+    __denac
     . ${HOME}/.bash_env_nvm_load
     . ${HOME}/.nvm/nvm.sh &> /dev/null
-    if [[ (-z $(nvm alias default)) && ($1 != "no-auto-lts") ]]; then
+    if [[ $(which node) = "${HOME}/.nvm/versions/"* ]]; then
+        __versions_export
         case $- in
-            *i*) nvm install --lts ;;
-            *) nvm install --lts &> /dev/null ;;
-        esac
-        local auto_lts=
-    fi
-    case $- in
-        *i*) __npm_completion ;;
-    esac
-    if [[ (! -v auto_lts) && ($(which node) = "${HOME}/.nvm/versions/"*) ]]; then
-        export NODE_VERSION=$(node --version)
-        case $- in
-            *i*) echo "Now using NVM node $NODE_VERSION (npm v$(npm --version))" ;;
+            *i*) __npm_completion ;;
         esac
     fi
 }
 export -f __nvm_load
 
 __nvm_unload () {
-    ____nvm_unload
-    case $- in
-        *i*) echo "Now using system node $NODE_VERSION (npm v$(npm --version))" ;;
-    esac
-}
-export -f __nvm_unload
-
-____nvm_unload () {
     unalias nvm_load &> /dev/null
     unalias nvm &> /dev/null
     unset __nvm_mask
     if type nvm &> /dev/null; then
         nvm unload
     fi
-    export PATH=$embark_docker_embark_user_PATH_with_NPM
-    . ${HOME}/.bash_env_nvm_unload
-    export NODE_VERSION=$(node --version)
+    unset NODE_VERSION
+    unset NPM_VERSION
 }
-export -f ____nvm_unload
+export -f __nvm_unload
 
 simple_nodeenv () {
     pushd $PWD &> /dev/null
@@ -149,3 +111,17 @@ simple_nodeenv () {
     nac "$2"
 }
 export -f simple_nodeenv
+
+__versions_export () {
+    if type node &> /dev/null; then
+        local node_version=$(node --version)
+        export NODE_VERSION=${node_version##v}
+        export NPM_VERSION=$(npm --version)
+    else
+        unset NODE_VERSION
+        unset NPM_VERSION
+    fi
+}
+export -f __versions_export
+
+nvm_load
