@@ -102,13 +102,6 @@ RUN adduser --disabled-password --shell /bin/bash --gecos "" embark \
 COPY --from=builder-ipfs /go-ipfs/ipfs /usr/local/bin/
 USER embark
 WORKDIR /home/embark
-COPY --chown=embark:embark \
-     env/.bash_env \
-     env/.bash_env_nvm_load \
-     env/.bash_env_nvm_unload \
-     env/.bashrc \
-     env/.npmrc \
-     ./
 RUN git clone --depth 1 \
               https://github.com/Bash-it/bash-it.git \
               .bash_it 2> /dev/null \
@@ -133,7 +126,6 @@ RUN git clone --depth 1 \
     && ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]' \
     && ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["GET", "POST", "PUT"]'
 
-USER root
 ARG __CODESET
 ARG __LANG
 ARG __LANGUAGE
@@ -159,12 +151,7 @@ ENV __CODESET=${__CODESET} \
     NVM_VERSION=${NVM_VERSION} \
     SUEXEC_VERSION=${SUEXEC_VERSION}
 SHELL ["/bin/sh", "-c"]
-WORKDIR /
-COPY env/docker-entrypoint.sh \
-     env/user-entrypoint.sh \
-     env/install-extras.sh \
-     /usr/local/bin/
-
+USER root
 WORKDIR /dapp
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["embark", "run"]
@@ -177,3 +164,17 @@ EXPOSE 5001 8000 8080 8500 8545 8546 8555 8556 30301/udp 30303
 COPY --from=builder-geth /geth-alltools* /usr/local/bin/
 COPY --from=builder-micro /micro*/micro /usr/local/bin/
 COPY --from=builder-suexec /su-exec/su-exec /usr/local/bin/
+COPY env/docker-entrypoint.sh \
+     env/user-entrypoint.sh \
+     env/install-extras.sh \
+     /usr/local/bin/
+COPY --chown=embark:embark \
+     env/.bash_env \
+     env/.bash_env_denac \
+     env/.bash_env_nvm_load \
+     env/.bashrc \
+     env/.npmrc \
+     /home/embark/
+COPY --chown=embark:embark \
+     env/nodez.theme.bash \
+     /home/embark/.bash_it/custom/themes/nodez/
