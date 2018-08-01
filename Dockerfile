@@ -18,8 +18,7 @@ ARG SUEXEC_VERSION=0.2
 # multi-stage builder images
 # ------------------------------------------------------------------------------
 
-ARG NODE_TAG=8.11.3-stretch
-FROM node:${NODE_TAG} as builder-base
+FROM ${BUILDER_BASE_IMAGE}:${BUILDER_BASE_TAG} as builder-base
 ARG __CODESET
 ARG __LANG
 ARG __LANGUAGE
@@ -119,6 +118,8 @@ RUN mkdir -p .npm-packages \
     && git clone --branch ${NVM_VERSION} \
                  --depth 1 \
                  https://github.com/creationix/nvm.git .nvm 2> /dev/null \
+    && . .nvm/nvm.sh \
+    && nvm install v${NODE_VERSION} \
     && npm install -g "npm@${NPM_VERSION}" \
     && npm install -g "embark@${EMBARK_VERSION}" \
                       "ganache-cli@${GANACHE_VERSION}" \
