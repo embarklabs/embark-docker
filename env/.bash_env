@@ -76,6 +76,10 @@ __nvm_load () {
     __denac
     . ${HOME}/.bash_env_nvm_load
     . ${HOME}/.nvm/nvm.sh &> /dev/null
+    case $- in
+        *i*) bash-it enable completion nvm &> /dev/null; \
+             . ${BASH_IT}/completion/available/nvm.completion.bash ;;
+    esac
     if [[ $(which node) = "${HOME}/.nvm/versions/"* ]]; then
         __versions_export
         case $- in

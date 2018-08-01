@@ -107,7 +107,6 @@ RUN git clone --depth 1 \
               .bash_it 2> /dev/null \
     && export BASH_IT=${HOME}/.bash_it \
     && . ${BASH_IT}/bash_it.sh \
-    && bash-it enable completion nvm \
     && mkdir -p .bash_it/custom/themes/nodez \
     && pip install --user nodeenv==${NODEENV_VERSION} \
     && mkdir -p .local/nodeenv \
