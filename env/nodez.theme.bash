@@ -1,3 +1,7 @@
+# Author: Michael Bradley (https://github.com/michaelsbradleyjr/)
+# Based on the zorg theme:
+# https://github.com/Bash-it/bash-it/blob/master/themes/zork/zork.theme.bash
+
 SCM_THEME_PROMPT_PREFIX=""
 SCM_THEME_PROMPT_SUFFIX=""
 
