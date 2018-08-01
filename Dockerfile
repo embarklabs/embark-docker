@@ -1,13 +1,34 @@
+ARG __CODESET=UTF-8
+ARG __LANG=en_US.${__CODESET}
+ARG __LANGUAGE=en_US:en
+ARG __LC_ALL=en_US.${__CODESET}
+ARG BUILDER_BASE_IMAGE=buildpack-deps
+ARG BUILDER_BASE_TAG=stretch
+ARG EMBARK_VERSION=3.1.5
+ARG GANACHE_VERSION=6.1.4
+ARG GETH_VERSION=1.8.11-dea1ce05
+ARG IPFS_VERSION=0.4.15
+ARG MICRO_VERSION=1.4.0
+ARG NODE_VERSION=8.11.3
+ARG NODEENV_VERSION=1.3.2
+ARG NPM_VERSION=6.2.0
+ARG NVM_VERSION=0.33.11
+ARG SUEXEC_VERSION=0.2
+
 # multi-stage builder images
 # ------------------------------------------------------------------------------
 
 ARG NODE_TAG=8.11.3-stretch
 FROM node:${NODE_TAG} as builder-base
+ARG __CODESET
+ARG __LANG
+ARG __LANGUAGE
+ARG __LC_ALL
 
 # ------------------------------------------------------------------------------
 
 FROM builder-base as builder-geth
-ARG GETH_VERSION=1.8.11-dea1ce05
+ARG GETH_VERSION
 RUN export url="https://gethstore.blob.core.windows.net/builds" \
     && export platform="geth-alltools-linux-amd64" \
     && curl -fsSLO --compressed "${url}/${platform}-${GETH_VERSION}.tar.gz" \
@@ -17,7 +38,7 @@ RUN export url="https://gethstore.blob.core.windows.net/builds" \
 # ------------------------------------------------------------------------------
 
 FROM builder-base as builder-ipfs
-ARG IPFS_VERSION=0.4.15
+ARG IPFS_VERSION
 RUN export url="https://dist.ipfs.io/go-ipfs" \
     && export ver="v${IPFS_VERSION}/go-ipfs_v${IPFS_VERSION}" \
     && export platform="linux-amd64" \
@@ -27,7 +48,7 @@ RUN export url="https://dist.ipfs.io/go-ipfs" \
 # ------------------------------------------------------------------------------
 
 FROM builder-base as builder-micro
-ARG MICRO_VERSION=1.4.0
+ARG MICRO_VERSION
 RUN export url="https://github.com/zyedidia/micro/releases/download" \
     && export ver="v${MICRO_VERSION}/micro-${MICRO_VERSION}" \
     && export platform="linux64" \
@@ -37,8 +58,8 @@ RUN export url="https://github.com/zyedidia/micro/releases/download" \
 # ------------------------------------------------------------------------------
 
 FROM builder-base as builder-suexec
-ARG SUEXEC_VERSION=v0.2
-RUN git clone --branch ${SUEXEC_VERSION} \
+ARG SUEXEC_VERSION
+RUN git clone --branch v${SUEXEC_VERSION} \
               --depth 1 \
               https://github.com/ncopa/su-exec.git 2> /dev/null \
     && cd su-exec \
@@ -51,10 +72,6 @@ FROM builder-base
 
 LABEL maintainer="Andre Medeiros <andre@status.im>"
 
-ARG __CODESET
-ARG __LANG
-ARG __LANGUAGE
-ARG __LC_ALL
 RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get update \
     && apt-get install -y locales \
@@ -71,13 +88,18 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && unset DEBIAN_FRONTEND \
     && rm -rf /var/lib/apt/lists/* \
     && adduser --disabled-password --shell /bin/bash --gecos "" embark \
+ARG EMBARK_VERSION
+ARG GANACHE_VERSION
+ARG NODE_VERSION
+ARG NODEENV_VERSION
+ARG NPM_VERSION
+ARG NVM_VERSION
     && mkdir -p /dapp \
     && chown embark:embark /dapp \
     && curl -fsSLO --compressed "https://bootstrap.pypa.io/get-pip.py" \
     && python get-pip.py \
     && rm get-pip.py
 
-ENV LANG=${__LANG:-en_US.${__CODESET:-UTF-8}}
 COPY --from=builder-ipfs /go-ipfs/ipfs /usr/local/bin/
 
 USER embark
@@ -90,11 +112,6 @@ COPY --chown=embark:embark \
      env/.bashrc \
      env/.npmrc \
      ./
-ARG EMBARK_VERSION=3.1.5
-ARG GANACHE_VERSION=6.1.4
-ARG NODEENV_VERSION=1.3.2
-ARG NPM_VERSION=6.2.0
-ARG NVM_VERSION=v0.33.11
 RUN mkdir -p .npm-packages \
              .local/nodeenv \
     && . .bash_env \
@@ -112,6 +129,30 @@ RUN mkdir -p .npm-packages \
     && ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["GET", "POST", "PUT"]'
 
 USER root
+ARG __CODESET
+ARG __LANG
+ARG __LANGUAGE
+ARG __LC_ALL
+ARG BUILDER_BASE_IMAGE
+ARG BUILDER_BASE_TAG
+ARG GETH_VERSION
+ARG IPFS_VERSION
+ARG MICRO_VERSION
+ARG SUEXEC_VERSION
+ENV __CODESET=${__CODESET} \
+    __LANG=${__LANG} \
+    __LANGUAGE=${__LANGUAGE} \
+    __LC_ALL=${__LC_ALL} \
+    BUILDER_BASE_IMAGE=${BUILDER_BASE_IMAGE} \
+    BUILDER_BASE_TAG=${BUILDER_BASE_TAG} \
+    EMBARK_VERSION=${EMBARK_VERSION} \
+    GANACHE_VERSION=${GANACHE_VERSION} \
+    GETH_VERSION=${GETH_VERSION} \
+    IPFS_VERSION=${IPFS_VERSION} \
+    MICRO_VERSION=${MICRO_VERSION} \
+    NODEENV_VERSION=${NODEENV_VERSION} \
+    NVM_VERSION=${NVM_VERSION} \
+    SUEXEC_VERSION=${SUEXEC_VERSION}
 SHELL ["/bin/sh", "-c"]
 WORKDIR /
 COPY env/docker-entrypoint.sh \
