@@ -18,16 +18,21 @@ __nodez_ne() {
     if [[ -v NODE_VIRTUAL_ENV ]]; then
         env="${NODE_VIRTUAL_ENV##*/}"
     fi
-    if [[ -v NODE_VERSION ]]; then
-        [ "$env" != "" ] && echo "[${bold_yellow}$env${normal}"
-    else
-        [ "$env" != "" ] && echo "[${bold_yellow}$env${normal}]"
+    if [[ "$env" != "" ]]; then
+        env="[${bold_yellow}$env${normal}"
+        if [[ ! -v NODE_VERSION ]]; then
+            env+="]"
+        fi
+        echo "$env"
     fi
 }
 
 __nodez_nv() {
-    [[ -v NODE_VERSION ]] \
-        && echo "→${__nodez_char_node}${NODE_VERSION}${__nodez_char_npm}${NPM_VERSION}]"
+    if [[ -v NODE_VERSION ]]; then
+        local nv="＝${__nodez_char_node}${NODE_VERSION}"
+        nv+="${__nodez_char_npm}${NPM_VERSION}]"
+        echo "$nv"
+    fi
 }
 
 __nodez_scm_prompt() {
