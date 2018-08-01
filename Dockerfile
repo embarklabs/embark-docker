@@ -85,13 +85,14 @@ FROM builder-base
 
 LABEL maintainer="Andre Medeiros <andre@status.im>"
 
-    && adduser --disabled-password --shell /bin/bash --gecos "" embark \
 ARG EMBARK_VERSION
 ARG GANACHE_VERSION
 ARG NODE_VERSION
 ARG NODEENV_VERSION
 ARG NPM_VERSION
 ARG NVM_VERSION
+SHELL ["/bin/bash", "-c"]
+RUN adduser --disabled-password --shell /bin/bash --gecos "" embark \
     && mkdir -p /dapp \
     && chown embark:embark /dapp \
     && curl -fsSLO --compressed "https://bootstrap.pypa.io/get-pip.py" \
@@ -99,9 +100,7 @@ ARG NVM_VERSION
     && rm get-pip.py
 
 COPY --from=builder-ipfs /go-ipfs/ipfs /usr/local/bin/
-
 USER embark
-SHELL ["/bin/bash", "-c"]
 WORKDIR /home/embark
 COPY --chown=embark:embark \
      env/.bash_env \
