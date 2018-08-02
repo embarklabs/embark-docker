@@ -6,10 +6,12 @@ In a Bash shell:
 ``` shell
 source <(curl https://bit.ly/run_embark)
 run_embark demo
-# ^ will create an embark_demo directory in the docker host's $PWD
 cd embark_demo
 run_embark
 ```
+
+Note that the `run_embark demo` command will create an `embark_demo` directory in
+the docker host's `$PWD`.
 
 ## Usage via `run.sh`
 
@@ -21,12 +23,11 @@ Many aspects of the script's behavior can be overridden with environment
 variables, and that approach can be (optionally) combined with `docker build`:
 
 ``` shell
-export EMBARK_DOCKER_EXTRA_RUN_OPTS='--rm'
 export EMBARK_DOCKER_IMAGE=statusim/embark
 export EMBARK_DOCKER_TAG=custom
 export EMBARK_DOCKERFILE='https://github.com/embark-framework/embark-docker.git#master'
 export EMBARK_VERSION='embark-framework/embark#develop'
-export NODE_TAG=10.7.0
+export NODE_VERSION=10.7.0
 export RUNNER='https://raw.githubusercontent.com/embark-framework/embark-docker/master/run.sh'
 
 docker build \
@@ -36,9 +37,9 @@ docker build \
        $EMBARK_DOCKERFILE
 
 source <(curl $RUNNER)
-run_embark demo
+run_embark --rm -- demo
 cd embark_demo
-run_embark
+run_embark --rm --
 ```
 
 Review the
@@ -46,6 +47,20 @@ Review the
 and
 [run.sh](https://github.com/embark-framework/embark-docker/blob/master/run.sh)
 for all possible overrides.
+
+It's possible to pass additional options to `docker run` by specifying them
+before `--`:
+
+``` shell
+run_embark [docker-run-opts] -- [command]
+```
+
+To completely replace the default `docker run` options:
+
+``` shell
+EMBARK_DOCKER_RUN_OPTS_REPLACE=true
+run_embark [docker-run-opts] -- [command]
+```
 
 ### Shortcuts
 
@@ -82,7 +97,10 @@ The container comes equipped with
 [nodeenv](https://github.com/ekalinin/nodeenv) and
 [nvm](https://github.com/creationix/nvm). A `default` Node.js environment is
 installed via `nodeenv` during image build and placed in
-`~embark/.local/nodeenv/default`. Both `nodeenv` and `nvm` can be used in
+`~embark/.local/nodeenv/default`. The `default` environment is automatically
+activated by the container's entrypoint.
+
+Both `nodeenv` and `nvm` can be used in
 interactive and non-interactive scripts.
 
 #### `nodeenv`
@@ -205,16 +223,13 @@ For greater flexibility, you can specify a script with
 script, and extra flags can be provided to `docker run` to forward docker host
 environment variables.
 
-Keep in mind that such scripts will be run as the `embark` user owing to the
+Keep in mind that such scripts will run as the `embark` user owing to the
 container's entrypoint.
 
 ``` shell
 #!/bin/bash
-
 # this script is located at /path/to/my_script.sh on the docker host, not necessarily in host's $PWD
-
 # dangling "
-
 c=container!
 echo $HOST_HOSTNAME
 echo $HOSTNAME
@@ -228,22 +243,16 @@ eval echo \\\$\$3
 ```
 Invoke with:
 ``` shell
-EMBARK_DOCKER_EXTRA_RUN_OPTS="-e HOST_HOSTNAME=$HOSTNAME"
 EMBARK_DOCKER_RUN=/path/to/my_script.sh
-
 a=host!
-
-run_embark $a b c
+run_embark -e HOST_HOSTNAME=$HOSTNAME -- $a b c
 ```
 
 Node.js variant:
 ``` javascript
 #!/usr/bin/env node
-
 // this script is located at /path/to/my_node_script.js on the docker host, not necessarily in host's $PWD
-
 const o = {c: 'container!'};
-
 console.log(process.env.HOST_HOSTNAME);
 console.log(process.env.HOSTNAME);
 console.log(JSON.stringify(process.argv));
@@ -254,12 +263,9 @@ console.log(o[process.argv[4]]);
 ```
 Invoke the same way:
 ``` shell
-EMBARK_DOCKER_EXTRA_RUN_OPTS="-e HOST_HOSTNAME=$HOSTNAME"
 EMBARK_DOCKER_RUN=/path/to/my_node_script.js
-
 a=host!
-
-run_embark $a b c
+run_embark -e HOST_HOSTNAME=$HOSTNAME -- $a b c
 ```
 
 #### `docker exec`
