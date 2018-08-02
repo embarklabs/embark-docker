@@ -29,7 +29,7 @@ RUN adduser --disabled-password --shell /bin/bash --gecos "" embark \
     ; do \
       cp "geth-alltools-linux-amd64-${GETH_VERSION}/${geth_tool}" "/usr/local/bin/${geth_tool}"; \
     done \
-    && rm -rf "geth-alltools-linux-amd64-${GETH_VERSION}*"\
+    && rm -rf "geth-alltools-linux-amd64-${GETH_VERSION}"* \
     # Install ipfs
     && curl -fsSLO --compressed "https://dist.ipfs.io/go-ipfs/v${IPFS_VERSION}/go-ipfs_v${IPFS_VERSION}_linux-amd64.tar.gz" \
     && tar -xvzf "go-ipfs_v${IPFS_VERSION}_linux-amd64.tar.gz" \
