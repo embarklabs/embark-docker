@@ -59,11 +59,7 @@ run_embark () {
         *e*) oldopts="set -e" ;;
         *) oldopts="set +e" ;;
     esac
-    if [[ $(shopt -po history) = "set -o history" ]]; then
-        oldopts="$oldopts; set -o history"
-    fi
     set +e
-    set +o history
 
     check_bash_version () {
         if [[ $BASH_VERSINFO -lt 4 ]]; then
