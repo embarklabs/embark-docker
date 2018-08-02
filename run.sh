@@ -7,6 +7,7 @@ run_embark () {
     local EMBARK_DOCKER_RUN="${EMBARK_DOCKER_RUN}"
     local EMBARK_DOCKER_RUN_INTERACTIVE=${EMBARK_DOCKER_RUN_INTERACTIVE:-false}
     local EMBARK_DOCKER_RUN_OPTS_REPLACE=${EMBARK_DOCKER_RUN_OPTS_REPLACE:-false}
+    local EMBARK_DOCKER_RUN_RM=${EMBARK_DOCKER_RUN_RM:-true}
     local EMBARK_DOCKER_TAG="${EMBARK_DOCKER_TAG:-latest}"
 
     local -a run_opts=(
@@ -37,6 +38,10 @@ run_embark () {
         "-e"
         "TERM"
     )
+
+    if [[ $EMBARK_DOCKER_RUN_RM = true ]]; then
+        run_opts=( "${run_opts[@]}" "--rm" )
+    fi
 
     local txtbld=$(tput bold)
     local txtrst=$(tput sgr0)

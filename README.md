@@ -37,9 +37,9 @@ docker build \
        $EMBARK_DOCKERFILE
 
 source <(curl $RUNNER)
-run_embark --rm -- demo
+run_embark demo
 cd embark_demo
-run_embark --rm --
+run_embark
 ```
 
 Review the
@@ -61,6 +61,20 @@ To completely replace the default `docker run` options:
 EMBARK_DOCKER_RUN_OPTS_REPLACE=true
 run_embark [docker-run-opts] -- [command]
 ```
+
+By default `run.sh` invokes `docker run` with the
+[`--rm`](https://docs.docker.com/engine/reference/run/#clean-up---rm) option,
+making the embark container ephemeral, i.e. it will not persist on the docker
+host's file system after the container exits. To override this behavior:
+
+``` shell
+EMBARK_DOCKER_RUN_RM=false
+run_embark [docker-run-opts] -- [command]
+```
+
+Note that if you have `EMBARK_DOCKER_RUN_OPTS_REPLACE=true`, then `--rm` would
+need to be provided in `[docker-run-opts]`, i.e. `EMBARK_DOCKER_RUN_RM` will be
+effectively ignored.
 
 ### Shortcuts
 
