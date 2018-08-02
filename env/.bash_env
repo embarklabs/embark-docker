@@ -1,0 +1,129 @@
+unset BASH_ENV
+
+export PATH=${HOME}/.local/bin:$PATH
+
+nac () {
+    local txtbld=$(tput bold)
+    local txtrst=$(tput sgr0)
+    local bldred=${txtbld}$(tput setaf 1)
+    local ERROR=${bldred}ERROR${txtrst}
+    if [[ -z "$1" ]]; then
+        echo "$ERROR: missing node environment name"
+        return 1
+    fi
+    if [[ ! -d "${HOME}/.local/nodeenv/$1" ]]; then
+        echo "$ERROR: no \"$1\" environment found in ${HOME}/.local/nodeenv"
+        return 1
+    fi
+    __nvm_unload
+    __denac
+    . ${HOME}/.local/nodeenv/$1/bin/activate
+    if [[ $? != 0 ]]; then
+        __denac
+        return 1
+    fi
+    __versions_export
+    alias denac='deactivate_node'
+    alias deactivate_node='__denac'
+    case $- in
+        *i*) __npm_completion ;;
+    esac
+}
+export -f nac
+
+__nac () {
+    local curr_word="${COMP_WORDS[COMP_CWORD]}"
+    local -a envs=( $(compgen -d -- "${HOME}/.local/nodeenv/$curr_word") )
+    COMPREPLY=( "${envs[@]##*/}" )
+    return 0
+}
+export -f __nac
+complete -F __nac nac
+
+__denac () {
+    unalias denac &> /dev/null
+    unalias deactivate_node &> /dev/null
+    if type deactivate_node &> /dev/null; then
+        deactivate_node
+    fi
+    . ${HOME}/.bash_env_denac
+    unset NODE_VERSION
+    unset NPM_VERSION
+}
+export -f __denac
+
+__npm_completion () {
+    . <(npm completion)
+}
+export -f __npm_completion
+
+nvm_load () {
+    __nvm_load
+    alias nvm_load='nvm'
+    alias nvm='__nvm_mask'
+    __nvm_mask () {
+        case "$*" in
+            unload*) __nvm_unload ;;
+            *) unalias nvm; nvm "$@"; alias nvm='__nvm_mask'; __versions_export ;;
+        esac
+    }
+    export -f __nvm_mask
+}
+export -f nvm_load
+
+__nvm_load () {
+    __nvm_unload
+    __denac
+    . ${HOME}/.bash_env_nvm_load
+    . ${HOME}/.nvm/nvm.sh &> /dev/null
+    case $- in
+        *i*) bash-it enable completion nvm &> /dev/null; \
+             . ${BASH_IT}/completion/available/nvm.completion.bash ;;
+    esac
+    if [[ $(which node) = "${HOME}/.nvm/versions/"* ]]; then
+        __versions_export
+        case $- in
+            *i*) __npm_completion ;;
+        esac
+    fi
+}
+export -f __nvm_load
+
+__nvm_unload () {
+    unalias nvm_load &> /dev/null
+    unalias nvm &> /dev/null
+    unset __nvm_mask
+    if type nvm &> /dev/null; then
+        nvm unload
+    fi
+    unset NODE_VERSION
+    unset NPM_VERSION
+}
+export -f __nvm_unload
+
+simple_nodeenv () {
+    pushd $PWD &> /dev/null
+    cd ${HOME}/.local/nodeenv
+    nodeenv --prebuilt --node "$@"
+    if [[ $? != 0 ]]; then
+        popd &> /dev/null
+        return 1
+    fi
+    popd &> /dev/null
+    nac "$2"
+}
+export -f simple_nodeenv
+
+__versions_export () {
+    if type node &> /dev/null; then
+        local node_version=$(node --version)
+        export NODE_VERSION=${node_version##v}
+        export NPM_VERSION=$(npm --version)
+    else
+        unset NODE_VERSION
+        unset NPM_VERSION
+    fi
+}
+export -f __versions_export
+
+nac default
