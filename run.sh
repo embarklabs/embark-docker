@@ -1,13 +1,42 @@
 #!/usr/bin/env bash
 
 run_embark () {
-    local EMBARK_DOCKER_EXTRA_RUN_OPTS=${EMBARK_DOCKER_EXTRA_RUN_OPTS:-"-e __embark_docker_runsh"}
     local EMBARK_DOCKER_MOUNT_SOURCE=${EMBARK_DOCKER_MOUNT_DIR:-$PWD}
     local EMBARK_DOCKER_MOUNT_TARGET=${EMBARK_DOCKER_MOUNT_DIR:-/dapp}
     local EMBARK_DOCKER_IMAGE=${EMBARK_DOCKER_IMAGE:-statusim/embark}
     local EMBARK_DOCKER_RUN=${EMBARK_DOCKER_RUN}
     local EMBARK_DOCKER_RUN_INTERACTIVE=${EMBARK_DOCKER_RUN_INTERACTIVE:-false}
+    local EMBARK_DOCKER_RUN_OPTS_REPLACE=${EMBARK_DOCKER_RUN_OPTS_REPLACE:-false}
     local EMBARK_DOCKER_TAG=${EMBARK_DOCKER_TAG:-latest}
+
+    local -a run_opts=(
+        "-i"
+        "-t"
+        "-p"
+        "5001:5001"
+        "-p"
+        "8000:8000"
+        "-p"
+        "8080:8080"
+        "-p"
+        "8500:8500"
+        "-p"
+        "8545:8545"
+        "-p"
+        "8546:8546"
+        "-p"
+        "8555:8555"
+        "-p"
+        "8556:8556"
+        "-p"
+        "30301:30301/udp"
+        "-p"
+        "30303:30303"
+        "-v"
+        "${EMBARK_DOCKER_MOUNT_SOURCE}:${EMBARK_DOCKER_MOUNT_TARGET}"
+        "-e"
+        "TERM"
+    )
 
     local txtbld=$(tput bold)
     local txtrst=$(tput sgr0)
@@ -20,7 +49,7 @@ run_embark () {
     local INFO=${bldcyn}INFO${txtrst}
     local WARNING=${bldylw}WARNING${txtrst}
 
-    local oldopts=""
+    local oldopts
     case $- in
         *e*) oldopts="set -e" ;;
         *) oldopts="set +e" ;;
@@ -68,16 +97,42 @@ run_embark () {
         fi
     fi
 
-    local -a cmd=( "$@" )
-    local -a extra_run_opts=( $EMBARK_DOCKER_EXTRA_RUN_OPTS )
+    local had_run_opts=false
+    local -a _run_opts=()
+    local -a _cmd=()
+    local -a cmd
+
+    while [[ ! -z "$1" ]]; do
+        if [[ "$1" = "--" ]]; then
+            had_run_opts=true
+        else
+            if [[ $had_run_opts = true ]]; then
+                _cmd=( "${_cmd[@]}" "$1" )
+            else
+                _run_opts=( "${_run_opts[@]}" "$1" )
+            fi
+        fi
+        shift
+    done
+
+    if [[ $had_run_opts = true ]]; then
+        cmd=( "${_cmd[@]}" )
+        if [[ $EMBARK_DOCKER_RUN_OPTS_REPLACE = true ]]; then
+            run_opts=( "${_run_opts[@]}" )
+        else
+            run_opts=( "${run_opts[@]}" "${_run_opts[@]}" )
+        fi
+    else
+        cmd=( "${_run_opts[@]}" )
+    fi
 
     if [[ -z "$EMBARK_DOCKER_RUN" ]]; then
-        case $1 in
+        case "${cmd[0]}" in
             -V|--version|-h|--help|new|demo|build|run|blockchain|simulator|test|\
-                reset|graph|upload|version) cmd=( "embark" "$cmd" ) ;;
+                reset|graph|upload|version) cmd=( "embark" "${cmd[@]}" ) ;;
         esac
     else
-        local i_flag=
+        local i_flag
         if [[ $EMBARK_DOCKER_RUN_INTERACTIVE = true ]]; then
             i_flag='i'
         else
@@ -85,39 +140,22 @@ run_embark () {
         fi
 
         local run_script=$(< "$EMBARK_DOCKER_RUN")
-# do not remove empty lines below
 # do not add indentation to lines below
-        run_script="exec bash -s $@ << 'SCRIPT'
+        run_script="exec bash -s ${cmd[@]} << 'SCRIPT'
 td=\$(mktemp -d)
 cat << 'RUN' > \$td/run_script
 $run_script
 RUN
-
 chmod +x \$td/run_script
-exec \$td/run_script $@
+exec \$td/run_script \$@
 SCRIPT
-
 "
-# do not remove empty lines above
 # do not add indentation to lines above
         cmd=( "bash" "-${i_flag}c" "$run_script" )
     fi
 
     docker run \
-           -it \
-           -p 5001:5001 \
-           -p 8000:8000 \
-           -p 8080:8080 \
-           -p 8500:8500 \
-           -p 8545:8545 \
-           -p 8546:8546 \
-           -p 8555:8555 \
-           -p 8556:8556 \
-           -p 30301:30301/udp \
-           -p 30303:30303 \
-           -v "${EMBARK_DOCKER_MOUNT_SOURCE}:${EMBARK_DOCKER_MOUNT_TARGET}" \
-           -e TERM \
-           "${extra_run_opts[@]}" \
+           "${run_opts[@]}" \
            "${EMBARK_DOCKER_IMAGE}:${EMBARK_DOCKER_TAG}" \
            "${cmd[@]}"
 
