@@ -4,7 +4,7 @@
 
 In a Bash shell:
 ``` shell
-source <(curl https://bit.ly/run_embark)
+source <(curl -L https://bit.ly/run_embark)
 run_embark demo
 cd embark_demo
 run_embark
