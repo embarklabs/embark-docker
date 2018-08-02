@@ -17,9 +17,10 @@ the docker host's `$PWD`.
 
 [`run.sh`](https://github.com/embark-framework/embark-docker/blob/master/run.sh)
 is a Bash script that simplifies usage of the embark container: publishing
-ports, bind mounting a host volume, and so on.
+ports, bind mounting a host volume, and so on. The script exports a shell
+function named `run_embark`.
 
-Many aspects of the script's behavior can be overridden with environment
+Many aspects of `run_embark`'s behavior can be overridden with environment
 variables, and that approach can be (optionally) combined with `docker build`:
 
 ``` shell
@@ -62,7 +63,7 @@ EMBARK_DOCKER_RUN_OPTS_REPLACE=true
 run_embark [docker-run-opts] -- [command]
 ```
 
-By default `run.sh` invokes `docker run` with the
+By default `run_embark` invokes `docker run` with the
 [`--rm`](https://docs.docker.com/engine/reference/run/#clean-up---rm) option,
 making the embark container ephemeral, i.e. it will not persist on the docker
 host's file system after the container exits. To override this behavior:
@@ -223,7 +224,7 @@ SCRIPT
 '
 ```
 
-Since `run.sh` mounts the docker host's `$PWD` into the container's `/dapp`, and
+Since `run_embark` mounts the docker host's `$PWD` into the container's `/dapp`, and
 since `/dapp` is the container's default working directory, it's also possible
 to do:
 
