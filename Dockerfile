@@ -106,16 +106,16 @@ RUN git clone --depth 1 \
               https://github.com/Bash-it/bash-it.git \
               .bash_it 2> /dev/null \
     && mkdir -p .bash_it/custom/themes/nodez \
-    && pip install --user nodeenv==${NODEENV_VERSION} \
-    && mkdir -p .local/nodeenv \
-    && export PATH=${HOME}/.local/bin:$PATH \
-    && nodeenv --prebuilt \
-               --node ${NODE_VERSION} \
-               .local/nodeenv/default \
     && git clone --branch v${NVM_VERSION} \
                  --depth 1 \
                  https://github.com/creationix/nvm.git \
                  .nvm 2> /dev/null \
+    && export PATH=${HOME}/.local/bin:$PATH \
+    && pip install --user nodeenv==${NODEENV_VERSION} \
+    && mkdir -p .local/nodeenv \
+    && nodeenv --prebuilt \
+               --node ${NODE_VERSION} \
+               .local/nodeenv/default \
     && . .local/nodeenv/default/bin/activate \
     && npm install -g "npm@${NPM_VERSION}" \
     && npm install -g "embark@${EMBARK_VERSION}" \
