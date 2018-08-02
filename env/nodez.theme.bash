@@ -1,5 +1,5 @@
 # Author: Michael Bradley (https://github.com/michaelsbradleyjr/)
-# Based on the zorg theme:
+# Based on the zork theme:
 # https://github.com/Bash-it/bash-it/blob/master/themes/zork/zork.theme.bash
 
 SCM_THEME_PROMPT_PREFIX=""
