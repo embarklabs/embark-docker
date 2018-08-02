@@ -170,7 +170,10 @@ run_embark bash -c 'nvm_load && nvm install --latest-npm 8.11.3 && node --versio
 Bash
 [here-documents](https://www.gnu.org/software/bash/manual/html_node/Redirections.html#Here-Documents)
 can be used to compose scripts without employing an abundance of `&&`, `;`, and
-`\`:
+`\`. Just be mindful of umatched quotes and quotes-escaping when building
+meta-scripts; in such scenarios, use of
+[envsubst](https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html)
+is probably called for.
 
 ``` shell
 run_embark bash -c 'exec bash << "SCRIPT"
