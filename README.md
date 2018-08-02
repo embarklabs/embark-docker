@@ -24,8 +24,8 @@ variables, and that approach can be (optionally) combined with `docker build`:
 export EMBARK_DOCKER_EXTRA_RUN_OPTS='--rm'
 export EMBARK_DOCKER_IMAGE=statusim/embark
 export EMBARK_DOCKER_TAG=custom
-export EMBARK_DOCKERFILE='https://github.com/embark-framework/embark-docker.git#develop'
-export EMBARK_VERSION='embark-framework/embark#features/branch'
+export EMBARK_DOCKERFILE='https://github.com/embark-framework/embark-docker.git#master'
+export EMBARK_VERSION='embark-framework/embark#develop'
 export NODE_TAG=10.7.0
 export RUNNER='https://raw.githubusercontent.com/embark-framework/embark-docker/master/run.sh'
 
