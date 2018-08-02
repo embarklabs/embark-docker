@@ -115,10 +115,10 @@ SCRIPT
            -p 8556:8556 \
            -p 30301:30301/udp \
            -p 30303:30303 \
-           -v ${EMBARK_DOCKER_MOUNT_SOURCE}:${EMBARK_DOCKER_MOUNT_TARGET} \
+           -v "${EMBARK_DOCKER_MOUNT_SOURCE}:${EMBARK_DOCKER_MOUNT_TARGET}" \
            -e TERM \
            "${extra_run_opts[@]}" \
-           ${EMBARK_DOCKER_IMAGE}:${EMBARK_DOCKER_TAG} \
+           "${EMBARK_DOCKER_IMAGE}:${EMBARK_DOCKER_TAG}" \
            "${cmd[@]}"
 
     local docker_exit_status=$?
