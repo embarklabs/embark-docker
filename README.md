@@ -146,6 +146,11 @@ nvm_load && nvm use v10.7.0
 nac default
 ```
 
+#### `micro`
+
+The [micro](https://github.com/zyedidia/micro) editor is installed during image
+build, should you need to edit files within a running container.
+
 #### `install-extras.sh`
 
 Some nice-to-have utilities are not installed by default, but this can be done
