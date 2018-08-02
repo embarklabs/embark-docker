@@ -37,7 +37,6 @@ run_embark () {
             return 1
         fi
     }
-
     check_bash_version
 
     if [[ $? = 1 ]]; then
@@ -56,7 +55,6 @@ run_embark () {
             return 127
         fi
     }
-
     check_docker
 
     if [[ $? = 127 ]]; then
