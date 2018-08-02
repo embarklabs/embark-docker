@@ -268,7 +268,7 @@ container, `su-exec` and `bash -[i]c` can be used together:
 docker exec -it $container_id su-exec embark \
        bash -ic 'exec bash << "SCRIPT"
 
-simple_nodeenv 10.7.0 my_node
+simple_nodeenv 10.7.0 my_node || nac my_node
 npm i -g http-server
 exec http-server -p 8000
 
@@ -283,7 +283,7 @@ docker exec -it $container_id su-exec embark \
        bash -c 'exec bash << "SCRIPT"
 
 . ~/.bash_env
-simple_nodeenv 10.7.0 my_node
+simple_nodeenv 10.7.0 my_node || nac my_node
 npm i -g http-server
 exec http-server -p 8000
 
