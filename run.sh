@@ -68,13 +68,40 @@ run_embark () {
         fi
     fi
 
+    local -a cmd=( "$@" )
     local -a extra_run_opts=( $EMBARK_DOCKER_EXTRA_RUN_OPTS )
 
-    local -a cmd=( "$@" )
-    case $1 in
-        -V|--version|-h|--help|new|demo|build|run|blockchain|simulator|test|\
-            reset|graph|upload|version) cmd=( "embark" "$cmd" ) ;;
-    esac
+    if [[ -z "$EMBARK_DOCKER_RUN" ]]; then
+        case $1 in
+            -V|--version|-h|--help|new|demo|build|run|blockchain|simulator|test|\
+                reset|graph|upload|version) cmd=( "embark" "$cmd" ) ;;
+        esac
+    else
+        local i_flag=
+        if [[ $EMBARK_DOCKER_RUN_INTERACTIVE = true ]]; then
+            i_flag='i'
+        else
+            i_flag=''
+        fi
+
+        local run_script=$(< "$EMBARK_DOCKER_RUN")
+# do not remove empty lines below
+# do not add indentation to lines below
+        run_script="exec bash -s $@ << 'SCRIPT'
+td=\$(mktemp -d)
+cat << 'RUN' > \$td/run_script
+$run_script
+RUN
+
+chmod +x \$td/run_script
+exec \$td/run_script $@
+SCRIPT
+
+"
+# do not remove empty lines above
+# do not add indentation to lines above
+        cmd=( "bash" "-${i_flag}c" "$run_script" )
+    fi
 
     docker run \
            -it \
