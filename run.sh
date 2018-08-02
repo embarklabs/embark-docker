@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
 
 run_embark () {
-    local oldopts=""
-    case $- in
-        *e*) oldopts="set -e" ;;
-        *) oldopts="set +e" ;;
-    esac
-    if [[ $(shopt -po history) = "set -o history" ]]; then
-        oldopts="$oldopts; set -o history"
-    fi
-    set +e
-    set +o history
+    local EMBARK_DOCKER_EXTRA_RUN_OPTS=${EMBARK_DOCKER_EXTRA_RUN_OPTS:-"-e __embark_docker_runsh"}
+    local EMBARK_DOCKER_MOUNT_SOURCE=${EMBARK_DOCKER_MOUNT_DIR:-$PWD}
+    local EMBARK_DOCKER_MOUNT_TARGET=${EMBARK_DOCKER_MOUNT_DIR:-/dapp}
+    local EMBARK_DOCKER_IMAGE=${EMBARK_DOCKER_IMAGE:-statusim/embark}
+    local EMBARK_DOCKER_RUN=${EMBARK_DOCKER_RUN}
+    local EMBARK_DOCKER_RUN_INTERACTIVE=${EMBARK_DOCKER_RUN_INTERACTIVE:-false}
+    local EMBARK_DOCKER_TAG=${EMBARK_DOCKER_TAG:-latest}
 
     local txtbld=$(tput bold)
     local txtrst=$(tput sgr0)
@@ -22,6 +19,17 @@ run_embark () {
     local ERROR=${bldred}ERROR${txtrst}
     local INFO=${bldcyn}INFO${txtrst}
     local WARNING=${bldylw}WARNING${txtrst}
+
+    local oldopts=""
+    case $- in
+        *e*) oldopts="set -e" ;;
+        *) oldopts="set +e" ;;
+    esac
+    if [[ $(shopt -po history) = "set -o history" ]]; then
+        oldopts="$oldopts; set -o history"
+    fi
+    set +e
+    set +o history
 
     check_bash_version () {
         if [[ $BASH_VERSINFO -lt 4 ]]; then
@@ -62,13 +70,7 @@ run_embark () {
         fi
     fi
 
-    local dummy="-e __embark_docker_runsh"
-    local EMBARK_DOCKER_EXTRA_RUN_OPTS=${EMBARK_DOCKER_EXTRA_RUN_OPTS:-$dummy}
     local -a extra_run_opts=( $EMBARK_DOCKER_EXTRA_RUN_OPTS )
-    local EMBARK_DOCKER_MOUNT_SOURCE=${EMBARK_DOCKER_MOUNT_DIR:-$PWD}
-    local EMBARK_DOCKER_MOUNT_TARGET=${EMBARK_DOCKER_MOUNT_DIR:-/dapp}
-    local EMBARK_DOCKER_IMAGE=${EMBARK_DOCKER_IMAGE:-statusim/embark}
-    local EMBARK_DOCKER_TAG=${EMBARK_DOCKER_TAG:-latest}
 
     local -a cmd=( "$@" )
     case $1 in
