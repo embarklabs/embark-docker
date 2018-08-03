@@ -28,7 +28,7 @@ variables, and that approach can be (optionally) combined with `docker build`.
 
 ``` shell
 export EMBARK_DOCKER_IMAGE=statusim/embark
-export EMBARK_DOCKER_TAG=custom
+export EMBARK_DOCKER_TAG=develop
 export EMBARK_DOCKERFILE='https://github.com/embark-framework/embark-docker.git#master'
 export EMBARK_VERSION='embark-framework/embark#develop'
 export NODE_VERSION=10.7.0
