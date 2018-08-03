@@ -17,8 +17,11 @@ the docker host's `$PWD`.
 
 [`run.sh`](https://github.com/embark-framework/embark-docker/blob/master/run.sh)
 is a Bash script that simplifies usage of the embark container: publishing
-ports, bind mounting a host volume, and so on. The script exports a shell
-function named `run_embark`.
+ports, bind mounting a host volume, and so on.
+
+When sourced, `run.sh` makes available a shell function named
+`run_embark`. When `run.sh` is invoked directly, the script forwards its
+arguments to the `run_embark` shell function.
 
 Many aspects of `run_embark`'s behavior can be overridden with environment
 variables, and that approach can be (optionally) combined with `docker build`.

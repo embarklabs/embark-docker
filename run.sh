@@ -174,6 +174,7 @@ SCRIPT
         fi
     fi
 }
+export -f run_embark
 
 if [[ "$0" = "$BASH_SOURCE" ]]; then
     run_embark "$@"
