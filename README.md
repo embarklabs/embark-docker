@@ -36,7 +36,7 @@ export RUNNER='https://raw.githubusercontent.com/embark-framework/embark-docker/
 
 docker build \
        --build-arg EMBARK_VERSION=$EMBARK_VERSION \
-       --build-arg NODE_TAG=$NODE_TAG \
+       --build-arg NODE_VERSION=$NODE_VERSION \
        -t $EMBARK_DOCKER_IMAGE:$EMBARK_DOCKER_TAG \
        $EMBARK_DOCKERFILE
 
