@@ -21,7 +21,7 @@ ports, bind mounting a host volume, and so on. The script exports a shell
 function named `run_embark`.
 
 Many aspects of `run_embark`'s behavior can be overridden with environment
-variables, and that approach can be (optionally) combined with `docker build`:
+variables, and that approach can be (optionally) combined with `docker build`.
 
 ``` shell
 export EMBARK_DOCKER_IMAGE=statusim/embark
@@ -50,7 +50,7 @@ and
 for all possible overrides.
 
 It's possible to pass additional options to `docker run` by specifying them
-before `--`:
+before `--`.
 
 ``` shell
 run_embark [docker-run-opts] -- [command]
@@ -79,7 +79,7 @@ effectively ignored.
 
 ### Shortcuts
 
-These are equivlent:
+These are equivalent:
 
 ``` shell
 run_embark
@@ -129,7 +129,7 @@ nodeenv --prebuilt --node 10.7.0 ~/.local/nodeenv/my_node
 simple_nodeenv 10.7.0 my_node
 ```
 
-Activate and deactivate environments with `nac` and `denac`:
+Activate and deactivate environments with `nac` and `denac`.
 
 ``` shell
 nac my_node
@@ -143,7 +143,7 @@ installation, while `nodeenv` does not.
 
 #### `nvm`
 
-If `nvm` is preferable, it needs to be loaded first:
+If `nvm` is preferable, it needs to be loaded first.
 
 ``` shell
 nvm_load
@@ -152,7 +152,7 @@ nvm install --latest-npm 8.11.3
 
 `nvm deactivate` and `nvm unload` will work as expected. It's also possible to
 move between `nodeenv` and `nvm` environments without first deactivating or
-unloading:
+unloading.
 
 ``` shell
 nac default
@@ -171,7 +171,7 @@ build, should you need to edit files within a running container.
 Some nice-to-have utilities are not installed by default, but this can be done
 by running
 [`install-extras.sh`](https://github.com/embark-framework/embark-docker/blob/master/env/install-extras.sh)
-as the `root` user in an already running container:
+as the `root` user in an already running container.
 
 ``` shell
 docker exec -it $container_id install-extras.sh
@@ -181,7 +181,7 @@ docker exec -it $container_id install-extras.sh
 
 #### Simple
 
-A single command with options can be supplied directly:
+A single command with options can be supplied directly.
 
 ``` shell
 run_embark bash
@@ -196,7 +196,7 @@ run_embark ps -ef
 
 #### Compound
 
-Compound commands should be passed to `bash -[i]c`:
+Compound commands should be passed to `bash -[i]c`.
 
 ``` shell
 run_embark bash -c 'ps -ef && ls / ; which embark'
@@ -291,7 +291,7 @@ run_embark -e HOST_HOSTNAME=$HOSTNAME -- $a b c
 #### `docker exec`
 
 When executing compound commands via `docer exec` in a running embark
-container, `su-exec` and `bash -[i]c` can be used together:
+container, `su-exec` and `bash -[i]c` can be used together.
 
 ``` shell
 docker exec -it $container_id su-exec embark \
@@ -305,7 +305,7 @@ SCRIPT
 '
 ```
 
-To go non-interactive, manually source the embark user's `.bash_env`:
+To go non-interactive, manually source the embark user's `.bash_env`.
 
 ``` shell
 docker exec -it $container_id su-exec embark \
