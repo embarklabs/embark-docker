@@ -44,9 +44,9 @@ run_embark
 ```
 
 Review the
-[Dockerfile](https://github.com/embark-framework/embark-docker/blob/master/Dockerfile)
+[`Dockerfile`](https://github.com/embark-framework/embark-docker/blob/master/Dockerfile)
 and
-[run.sh](https://github.com/embark-framework/embark-docker/blob/master/run.sh)
+[`run.sh`](https://github.com/embark-framework/embark-docker/blob/master/run.sh)
 for all possible overrides.
 
 It's possible to pass additional options to `docker run` by specifying them
@@ -109,8 +109,8 @@ run_embark --help
 ### Utilities
 
 The container comes equipped with
-[nodeenv](https://github.com/ekalinin/nodeenv) and
-[nvm](https://github.com/creationix/nvm). A `default` Node.js environment is
+[`nodeenv`](https://github.com/ekalinin/nodeenv) and
+[`nvm`](https://github.com/creationix/nvm). A `default` Node.js environment is
 installed via `nodeenv` during image build and placed in
 `~embark/.local/nodeenv/default`. The `default` environment is automatically
 activated by the container's entrypoint.
@@ -163,7 +163,7 @@ nac default
 
 #### `micro`
 
-The [micro](https://github.com/zyedidia/micro) editor is installed during image
+The [`micro`](https://github.com/zyedidia/micro) editor is installed during image
 build, should you need to edit files within a running container.
 
 #### `install-extras.sh`
@@ -210,7 +210,7 @@ Bash
 can be used to compose scripts without employing an abundance of `&&`, `;`, and
 `\`. Just be mindful of umatched quotes and quotes-escaping when building
 meta-scripts; in such scenarios, use of
-[envsubst](https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html)
+[`envsubst`](https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html)
 is probably called for.
 
 ``` shell
