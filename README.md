@@ -27,12 +27,12 @@ Many aspects of `run_embark`'s behavior can be overridden with environment
 variables, and that approach can be (optionally) combined with `docker build`.
 
 ``` shell
-export EMBARK_DOCKER_IMAGE=statusim/embark
-export EMBARK_DOCKER_TAG=develop
-export EMBARK_DOCKERFILE='https://github.com/embark-framework/embark-docker.git#master'
-export EMBARK_VERSION='embark-framework/embark#develop'
-export NODE_VERSION=10.7.0
-export RUNNER='https://raw.githubusercontent.com/embark-framework/embark-docker/master/run.sh'
+EMBARK_DOCKER_IMAGE=statusim/embark
+EMBARK_DOCKER_TAG=develop
+EMBARK_DOCKERFILE='https://github.com/embark-framework/embark-docker.git#master'
+EMBARK_VERSION='embark-framework/embark#develop'
+NODE_VERSION=10.7.0
+RUNNER='https://raw.githubusercontent.com/embark-framework/embark-docker/master/run.sh'
 
 docker build \
        --build-arg EMBARK_VERSION=$EMBARK_VERSION \
