@@ -143,16 +143,16 @@ run_embark () {
         local run_script=$(< "$EMBARK_DOCKER_RUN")
         # do not alter indentation, tabs in lines below
         run_script=$(cat <<- RUN_SCRIPT
-	exec bash -${i_flag}s \$(tty) ${cmd[@]} << 'SCRIPT'
+	exec bash -${i_flag}s \$(tty) ${cmd[@]} << 'RUN'
 	__tty=\$1
 	shift
-	td=\$(mktemp -d)
-	cat << 'RUN' > \$td/run_script
+	script=\$(mktemp)
+	cat << 'SCRIPT' > \$script
 	$run_script
-	RUN
-	chmod +x \$td/run_script
-	exec \$td/run_script \$@ < \$__tty
 	SCRIPT
+	chmod +x \$script
+	exec \$script \$@ < \$__tty
+	RUN
 	RUN_SCRIPT
         )
         # do not alter indentation, tabs in lines above
