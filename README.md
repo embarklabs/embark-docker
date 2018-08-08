@@ -261,7 +261,7 @@ echo $1
 # a comment
 echo $2
 echo $3
-eval echo \\\$\$3
+eval echo \$$3
 # another comment
 ```
 Invoke with:
