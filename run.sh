@@ -146,7 +146,7 @@ run_embark () {
 	exec bash -${i_flag}s \$(tty) ${cmd[@]} << 'RUN'
 	__tty=\$1
 	shift
-	script=\$(mktemp)
+	script=/tmp/run_embark_script
 	cat << 'SCRIPT' > \$script
 	$run_script
 	SCRIPT
