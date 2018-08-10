@@ -2,6 +2,7 @@ ARG __CODESET=UTF-8
 ARG __LANG=en_US.${__CODESET}
 ARG __LANGUAGE=en_US:en
 ARG __LC_ALL=en_US.${__CODESET}
+ARG BASHIT_VERSION=10-aug-2018
 ARG BUILDER_BASE_IMAGE=buildpack-deps
 ARG BUILDER_BASE_TAG=stretch
 ARG EMBARK_VERSION=3.1.5
@@ -87,6 +88,7 @@ FROM builder-base
 
 LABEL maintainer="Andre Medeiros <andre@status.im>"
 
+ARG BASHIT_VERSION
 ARG EMBARK_VERSION
 ARG GANACHE_VERSION
 ARG NODE_VERSION
@@ -105,8 +107,9 @@ RUN adduser --disabled-password --shell /bin/bash --gecos "" embark \
 COPY --from=builder-ipfs /go-ipfs/ipfs /usr/local/bin/
 USER embark
 WORKDIR /home/embark
-RUN git clone --depth 1 \
-              https://github.com/Bash-it/bash-it.git \
+RUN git clone --branch ${BASHIT_VERSION} \
+              --depth 1 \
+              https://github.com/michaelsbradleyjr/bash-it.git \
               .bash_it 2> /dev/null \
     && mkdir -p .bash_it/custom/themes/nodez \
     && git clone --branch v${NVM_VERSION} \
@@ -143,6 +146,7 @@ ENV __CODESET=${__CODESET} \
     __LANG=${__LANG} \
     __LANGUAGE=${__LANGUAGE} \
     __LC_ALL=${__LC_ALL} \
+    BASHIT_VERSION=${BASHIT_VERSION} \
     BUILDER_BASE_IMAGE=${BUILDER_BASE_IMAGE} \
     BUILDER_BASE_TAG=${BUILDER_BASE_TAG} \
     EMBARK_VERSION=${EMBARK_VERSION} \
