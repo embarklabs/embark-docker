@@ -15,6 +15,7 @@ ARG NODEENV_VERSION=1.3.2
 ARG NPM_VERSION=6.2.0
 ARG NVM_VERSION=0.33.11
 ARG SUEXEC_VERSION=0.2
+ARG SWARM_VERSION=0.3.1-225171a4
 
 # multi-stage builder images
 # ------------------------------------------------------------------------------
@@ -81,6 +82,16 @@ RUN git clone --branch v${SUEXEC_VERSION} \
     && cd su-exec \
     && make
 
+# ------------------------------------------------------------------------------
+
+FROM builder-base as builder-swarm
+ARG SWARM_VERSION
+RUN export url="https://gethstore.blob.core.windows.net/builds" \
+    && export platform="swarm-linux-amd64" \
+    && curl -fsSLO --compressed "${url}/${platform}-${SWARM_VERSION}.tar.gz" \
+    && tar -xvzf swarm* \
+    && rm swarm*/COPYING
+
 # final image
 # ------------------------------------------------------------------------------
 
@@ -142,6 +153,7 @@ ARG GETH_VERSION
 ARG IPFS_VERSION
 ARG MICRO_VERSION
 ARG SUEXEC_VERSION
+ARG SWARM_VERSION
 ENV __CODESET=${__CODESET} \
     __LANG=${__LANG} \
     __LANGUAGE=${__LANGUAGE} \
@@ -156,7 +168,8 @@ ENV __CODESET=${__CODESET} \
     MICRO_VERSION=${MICRO_VERSION} \
     NODEENV_VERSION=${NODEENV_VERSION} \
     NVM_VERSION=${NVM_VERSION} \
-    SUEXEC_VERSION=${SUEXEC_VERSION}
+    SUEXEC_VERSION=${SUEXEC_VERSION} \
+    SWARM_VERSION=${SWARM_VERSION}
 SHELL ["/bin/sh", "-c"]
 USER root
 WORKDIR /dapp
@@ -171,6 +184,7 @@ EXPOSE 5001 8000 8080 8500 8545 8546 8555 8556 30301/udp 30303
 COPY --from=builder-geth /geth-alltools* /usr/local/bin/
 COPY --from=builder-micro /micro*/micro /usr/local/bin/
 COPY --from=builder-suexec /su-exec/su-exec /usr/local/bin/
+COPY --from=builder-swarm /swarm* /usr/local/bin/
 COPY env/docker-entrypoint.sh \
      env/user-entrypoint.sh \
      env/install-extras.sh \
