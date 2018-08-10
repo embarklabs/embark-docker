@@ -34,7 +34,9 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && dpkg-reconfigure locales \
     && update-locale LANG=${__LANG} LANGUAGE=${__LANGUAGE} LC_ALL=${__LC_ALL} \
     && unset DEBIAN_FRONTEND \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /usr/share/terminfo/d \
+    && ln -s /lib/terminfo/d/dumb /usr/share/terminfo/d/dumb
 ENV LANG=${__LANG}
 SHELL ["/bin/sh", "-c"]
 
@@ -93,6 +95,7 @@ ARG NPM_VERSION
 ARG NVM_VERSION
 SHELL ["/bin/bash", "-c"]
 RUN adduser --disabled-password --shell /bin/bash --gecos "" embark \
+    && usermod -a -G tty embark \
     && mkdir -p /dapp \
     && chown embark:embark /dapp \
     && curl -fsSLO --compressed "https://bootstrap.pypa.io/get-pip.py" \
