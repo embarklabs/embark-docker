@@ -34,6 +34,10 @@ __nodez_ne() {
 __nodez_nv() {
     if [[ -v NODE_VERSION ]]; then
         local nv="＝${__nodez_char_node}${NODE_VERSION}"
+        local npm_version=$(npm --version)
+        if [[ "$npm_version" != "$NPM_VERSION" ]]; then
+            export NPM_VERSION=$npm_version
+        fi
         nv+="${__nodez_char_npm}${NPM_VERSION}]"
         echo "$nv"
     fi
