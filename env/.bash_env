@@ -73,6 +73,7 @@ export -f nvm_load
 __nvm_load () {
     __denac
     . ${HOME}/.nvm/nvm.sh &> /dev/null
+    __nvm_unload
     case $- in
         *i*) bash-it enable completion nvm &> /dev/null; \
              . ${BASH_IT}/completion/available/nvm.completion.bash ;;
