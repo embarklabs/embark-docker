@@ -35,9 +35,23 @@ run_embark () {
         "30303:30303"
         "-v"
         "${EMBARK_DOCKER_MOUNT_SOURCE}:${EMBARK_DOCKER_MOUNT_TARGET}"
-        "-e"
-        "TERM"
     )
+
+    if [[ -v LANG ]]; then
+        run_opts=( "${run_opts[@]}" "-e" "LANG" )
+    fi
+
+    if [[ -v LANGUAGE ]]; then
+        run_opts=( "${run_opts[@]}" "-e" "LANGUAGE" )
+    fi
+
+    if [[ -v LC_ALL ]]; then
+        run_opts=( "${run_opts[@]}" "-e" "LC_ALL" )
+    fi
+
+    if [[ -v TERM ]]; then
+        run_opts=( "${run_opts[@]}" "-e" "TERM" )
+    fi
 
     if [[ $EMBARK_DOCKER_RUN_RM = true ]]; then
         run_opts=( "${run_opts[@]}" "--rm" )
