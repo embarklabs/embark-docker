@@ -2,7 +2,6 @@
 
 apt-get update
 apt-get install -y \
-        less \
         lsof \
         net-tools \
         parallel \

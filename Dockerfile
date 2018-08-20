@@ -28,7 +28,8 @@ ARG __LC_ALL
 SHELL ["/bin/bash", "-c"]
 RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get update \
-    && apt-get install -y locales \
+    && apt-get install -y less \
+                          locales \
     && sed -i \
            -e "s/# ${__LANG} ${__CODESET}/${__LANG} ${__CODESET}/" \
            /etc/locale.gen \
