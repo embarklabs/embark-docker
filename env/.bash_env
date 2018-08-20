@@ -1,6 +1,6 @@
 unset BASH_ENV
 
-export PATH=${HOME}/.local/bin:$PATH
+export PATH="${HOME}/.local/bin:$PATH"
 
 nac () {
     local txtbld=$(tput bold)
@@ -17,7 +17,7 @@ nac () {
     fi
     __nvm_unload
     __denac
-    . ${HOME}/.local/nodeenv/$1/bin/activate
+    . "${HOME}/.local/nodeenv/$1/bin/activate"
     if [[ $? != 0 ]]; then
         __denac
         return 1
@@ -72,11 +72,11 @@ export -f nvm_load
 
 __nvm_load () {
     __denac
-    . ${HOME}/.nvm/nvm.sh &> /dev/null
     __nvm_unload
+    . "${HOME}/.nvm/nvm.sh" &> /dev/null
     case $- in
         *i*) bash-it enable completion nvm &> /dev/null; \
-             . ${BASH_IT}/completion/available/nvm.completion.bash ;;
+             . "${BASH_IT}/completion/available/nvm.completion.bash" ;;
     esac
     if [[ $(which node) = "${HOME}/.nvm/versions/"* ]]; then
         __versions
@@ -99,8 +99,8 @@ __nvm_unload () {
 export -f __nvm_unload
 
 simple_nodeenv () {
-    pushd $PWD &> /dev/null
-    cd ${HOME}/.local/nodeenv
+    pushd "$PWD" &> /dev/null
+    cd "${HOME}/.local/nodeenv"
     nodeenv --prebuilt --node "$@"
     if [[ $? != 0 ]]; then
         popd &> /dev/null
