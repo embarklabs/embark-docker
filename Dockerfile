@@ -192,6 +192,7 @@ COPY env/docker-entrypoint.sh \
      /usr/local/bin/
 COPY --chown=embark:embark \
      env/.bash_env \
+     env/.bash_env_nodeenv_exports \
      env/.bash_env_unset_npm_config \
      env/.bashrc \
      env/.npmrc \

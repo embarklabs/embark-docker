@@ -25,11 +25,7 @@ nac () {
         return 1
     fi
     export -f deactivate_node
-    export _OLD_NODE_PATH
-    export _OLD_NODE_VIRTUAL_PATH
-    export _OLD_NODE_VIRTUAL_PS1
-    export _OLD_npm_config_prefix
-    export _OLD_NPM_CONFIG_PREFIX
+    . "${HOME}/.bash_env_nodeenv_exports"
     alias denac='deactivate_node'
     alias deactivate_node='__denac'
     __versions
