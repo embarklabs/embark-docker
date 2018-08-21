@@ -24,9 +24,15 @@ nac () {
         __denac
         return 1
     fi
-    __versions
+    export -f deactivate_node
+    export _OLD_NODE_PATH
+    export _OLD_NODE_VIRTUAL_PATH
+    export _OLD_NODE_VIRTUAL_PS1
+    export _OLD_npm_config_prefix
+    export _OLD_NPM_CONFIG_PREFIX
     alias denac='deactivate_node'
     alias deactivate_node='__denac'
+    __versions
     case $- in
         *i*) __npm_completion ;;
     esac
@@ -127,4 +133,12 @@ export -f __versions
 
 if [[ ! -v NODE_VIRTUAL_ENV ]]; then
     nac default
+else
+    if ! type denac &> /dev/null; then
+        alias denac='deactivate_node'
+        alias deactivate_node='__denac'
+        case $- in
+            *i*) __npm_completion ;;
+        esac
+    fi
 fi
