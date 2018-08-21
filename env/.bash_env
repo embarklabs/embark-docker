@@ -17,8 +17,8 @@ nac () {
         echo "$ERROR: no \"$1\" environment found in ${HOME}/.local/nodeenv"
         return 1
     fi
-    __nvm_unload
     __denac
+    __nvm_unload
     . "${HOME}/.local/nodeenv/$1/bin/activate"
     if [[ $? != 0 ]]; then
         __denac
