@@ -37,21 +37,22 @@ run_embark () {
         "${EMBARK_DOCKER_MOUNT_SOURCE}:${EMBARK_DOCKER_MOUNT_TARGET}"
     )
 
-    if [[ -v LANG ]]; then
-        run_opts=( "${run_opts[@]}" "-e" "LANG" )
-    fi
-
-    if [[ -v LANGUAGE ]]; then
-        run_opts=( "${run_opts[@]}" "-e" "LANGUAGE" )
-    fi
-
-    if [[ -v LC_ALL ]]; then
-        run_opts=( "${run_opts[@]}" "-e" "LC_ALL" )
-    fi
-
-    if [[ -v TERM ]]; then
-        run_opts=( "${run_opts[@]}" "-e" "TERM" )
-    fi
+    local env_var
+    for env_var in LANG \
+                   LANGUAGE \
+                   LC_ALL \
+                   TERM;
+    # do not alter indentation, tabs in lines below
+    do
+        local include_var=$(cat <<- ENV_VAR
+	if [[ -n $env_var && -v $env_var ]]; then
+	    run_opts=( "${run_opts[@]}" "-e" "$env_var" )
+	fi
+	ENV_VAR
+        )
+        eval "$include_var"
+    done
+    # do not alter indentation, tabs in lines above
 
     if [[ $EMBARK_DOCKER_RUN_RM = true ]]; then
         run_opts=( "${run_opts[@]}" "--rm" )
