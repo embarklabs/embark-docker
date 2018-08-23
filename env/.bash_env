@@ -1,6 +1,8 @@
 unset BASH_ENV
 
-export PATH=${HOME}/.local/bin:$PATH
+if [[ :$PATH: != *:"${HOME}/.local/bin":* ]] ; then
+    export PATH="${HOME}/.local/bin:$PATH"
+fi
 
 nac () {
     local txtbld=$(tput bold)
@@ -15,16 +17,18 @@ nac () {
         echo "$ERROR: no \"$1\" environment found in ${HOME}/.local/nodeenv"
         return 1
     fi
-    __nvm_unload
     __denac
-    . ${HOME}/.local/nodeenv/$1/bin/activate
+    __nvm_unload
+    . "${HOME}/.local/nodeenv/$1/bin/activate"
     if [[ $? != 0 ]]; then
         __denac
         return 1
     fi
-    __versions_export
+    export -f deactivate_node
+    . "${HOME}/.bash_env_nodeenv_exports"
     alias denac='deactivate_node'
     alias deactivate_node='__denac'
+    __versions
     case $- in
         *i*) __npm_completion ;;
     esac
@@ -46,9 +50,8 @@ __denac () {
     if type deactivate_node &> /dev/null; then
         deactivate_node
     fi
-    . ${HOME}/.bash_env_denac
-    unset NODE_VERSION
-    unset NPM_VERSION
+    . "${HOME}/.bash_env_unset_npm_config"
+    __versions
 }
 export -f __denac
 
@@ -64,7 +67,7 @@ nvm_load () {
     __nvm_mask () {
         case "$*" in
             unload*) __nvm_unload ;;
-            *) unalias nvm; nvm "$@"; alias nvm='__nvm_mask'; __versions_export ;;
+            *) unalias nvm; nvm "$@"; alias nvm='__nvm_mask'; __versions ;;
         esac
     }
     export -f __nvm_mask
@@ -72,16 +75,15 @@ nvm_load () {
 export -f nvm_load
 
 __nvm_load () {
-    __nvm_unload
     __denac
-    . ${HOME}/.bash_env_nvm_load
-    . ${HOME}/.nvm/nvm.sh &> /dev/null
+    __nvm_unload
+    . "${HOME}/.nvm/nvm.sh" &> /dev/null
     case $- in
         *i*) bash-it enable completion nvm &> /dev/null; \
-             . ${BASH_IT}/completion/available/nvm.completion.bash ;;
+             . "${BASH_IT}/completion/available/nvm.completion.bash" ;;
     esac
     if [[ $(which node) = "${HOME}/.nvm/versions/"* ]]; then
-        __versions_export
+        __versions
         case $- in
             *i*) __npm_completion ;;
         esac
@@ -96,14 +98,13 @@ __nvm_unload () {
     if type nvm &> /dev/null; then
         nvm unload
     fi
-    unset NODE_VERSION
-    unset NPM_VERSION
+    __versions
 }
 export -f __nvm_unload
 
 simple_nodeenv () {
-    pushd $PWD &> /dev/null
-    cd ${HOME}/.local/nodeenv
+    pushd "$PWD" &> /dev/null
+    cd "${HOME}/.local/nodeenv"
     nodeenv --prebuilt --node "$@"
     if [[ $? != 0 ]]; then
         popd &> /dev/null
@@ -114,7 +115,7 @@ simple_nodeenv () {
 }
 export -f simple_nodeenv
 
-__versions_export () {
+__versions () {
     if type node &> /dev/null; then
         local node_version=$(node --version)
         export NODE_VERSION=${node_version##v}
@@ -124,8 +125,16 @@ __versions_export () {
         unset NPM_VERSION
     fi
 }
-export -f __versions_export
+export -f __versions
 
 if [[ ! -v NODE_VIRTUAL_ENV ]]; then
     nac default
+else
+    if ! type denac &> /dev/null; then
+        alias denac='deactivate_node'
+        alias deactivate_node='__denac'
+        case $- in
+            *i*) __npm_completion ;;
+        esac
+    fi
 fi

@@ -2,16 +2,17 @@ ARG __CODESET=UTF-8
 ARG __LANG=en_US.${__CODESET}
 ARG __LANGUAGE=en_US:en
 ARG __LC_ALL=en_US.${__CODESET}
+ARG BASHIT_VERSION=10-aug-2018
 ARG BUILDER_BASE_IMAGE=buildpack-deps
 ARG BUILDER_BASE_TAG=stretch
-ARG EMBARK_VERSION=3.1.5
-ARG GANACHE_VERSION=6.1.4
-ARG GETH_VERSION=1.8.11-dea1ce05
-ARG IPFS_VERSION=0.4.15
-ARG MICRO_VERSION=1.4.0
+ARG EMBARK_VERSION=latest
+ARG GANACHE_VERSION=6.1.0
+ARG GETH_VERSION=1.8.12-37685930
+ARG IPFS_VERSION=0.4.17
+ARG MICRO_VERSION=1.4.1
 ARG NODE_VERSION=8.11.3
 ARG NODEENV_VERSION=1.3.2
-ARG NPM_VERSION=6.2.0
+ARG NPM_VERSION=6.4.0
 ARG NVM_VERSION=0.33.11
 ARG SUEXEC_VERSION=0.2
 
@@ -26,7 +27,8 @@ ARG __LC_ALL
 SHELL ["/bin/bash", "-c"]
 RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get update \
-    && apt-get install -y locales \
+    && apt-get install -y less \
+                          locales \
     && sed -i \
            -e "s/# ${__LANG} ${__CODESET}/${__LANG} ${__CODESET}/" \
            /etc/locale.gen \
@@ -87,6 +89,7 @@ FROM builder-base
 
 LABEL maintainer="Andre Medeiros <andre@status.im>"
 
+ARG BASHIT_VERSION
 ARG EMBARK_VERSION
 ARG GANACHE_VERSION
 ARG NODE_VERSION
@@ -105,8 +108,9 @@ RUN adduser --disabled-password --shell /bin/bash --gecos "" embark \
 COPY --from=builder-ipfs /go-ipfs/ipfs /usr/local/bin/
 USER embark
 WORKDIR /home/embark
-RUN git clone --depth 1 \
-              https://github.com/Bash-it/bash-it.git \
+RUN git clone --branch ${BASHIT_VERSION} \
+              --depth 1 \
+              https://github.com/michaelsbradleyjr/bash-it.git \
               .bash_it 2> /dev/null \
     && mkdir -p .bash_it/custom/themes/nodez \
     && git clone --branch v${NVM_VERSION} \
@@ -143,6 +147,7 @@ ENV __CODESET=${__CODESET} \
     __LANG=${__LANG} \
     __LANGUAGE=${__LANGUAGE} \
     __LC_ALL=${__LC_ALL} \
+    BASHIT_VERSION=${BASHIT_VERSION} \
     BUILDER_BASE_IMAGE=${BUILDER_BASE_IMAGE} \
     BUILDER_BASE_TAG=${BUILDER_BASE_TAG} \
     EMBARK_VERSION=${EMBARK_VERSION} \
@@ -173,8 +178,8 @@ COPY env/docker-entrypoint.sh \
      /usr/local/bin/
 COPY --chown=embark:embark \
      env/.bash_env \
-     env/.bash_env_denac \
-     env/.bash_env_nvm_load \
+     env/.bash_env_nodeenv_exports \
+     env/.bash_env_unset_npm_config \
      env/.bashrc \
      env/.npmrc \
      /home/embark/

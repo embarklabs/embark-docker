@@ -35,9 +35,24 @@ run_embark () {
         "30303:30303"
         "-v"
         "${EMBARK_DOCKER_MOUNT_SOURCE}:${EMBARK_DOCKER_MOUNT_TARGET}"
-        "-e"
-        "TERM"
     )
+
+    local env_var
+    for env_var in LANG \
+                   LANGUAGE \
+                   LC_ALL \
+                   TERM;
+    # do not alter indentation, tabs in lines below
+    do
+        local include_var=$(cat <<- ENV_VAR
+	if [[ -n $env_var && -v $env_var ]]; then
+	    run_opts=( "${run_opts[@]}" "-e" "$env_var" )
+	fi
+	ENV_VAR
+        )
+        eval "$include_var"
+    done
+    # do not alter indentation, tabs in lines above
 
     if [[ $EMBARK_DOCKER_RUN_RM = true ]]; then
         run_opts=( "${run_opts[@]}" "--rm" )
@@ -61,23 +76,22 @@ run_embark () {
     esac
     set +e
 
+    cleanup () {
+        local retval=$?
+        unset check_bash_version
+        unset check_docker
+        unset cleanup
+        eval "$oldopts"
+        return $retval
+    }
+
     check_bash_version () {
         if [[ $BASH_VERSINFO -lt 4 ]]; then
             echo "$ERROR: this script requires Bash version >= 4.0"
             return 1
         fi
     }
-    check_bash_version
-
-    if [[ $? = 1 ]]; then
-        unset check_bash_version
-        eval "$oldopts"
-        if [[ "$0" != "$BASH_SOURCE" ]]; then
-            return 1
-        else
-            exit 1
-        fi
-    fi
+    check_bash_version || cleanup || return
 
     check_docker () {
         if ! type docker &> /dev/null; then
@@ -85,18 +99,7 @@ run_embark () {
             return 127
         fi
     }
-    check_docker
-
-    if [[ $? = 127 ]]; then
-        unset check_bash_version
-        unset check_docker
-        eval "$oldopts"
-        if [[ "$0" != "$BASH_SOURCE" ]]; then
-            return 127
-        else
-            exit 127
-        fi
-    fi
+    check_docker || cleanup || return
 
     local had_run_opts=false
     local -a _run_opts=()
@@ -162,21 +165,10 @@ run_embark () {
     docker run \
            "${run_opts[@]}" \
            "${EMBARK_DOCKER_IMAGE}:${EMBARK_DOCKER_TAG}" \
-           "${cmd[@]}"
+           "${cmd[@]}" \
+        || cleanup || return
 
-    local docker_exit_status=$?
-
-    unset check_bash_version
-    unset check_docker
-    eval "$oldopts"
-
-    if [[ $docker_exit_status != 0 ]]; then
-        if [[ "$0" != "$BASH_SOURCE" ]]; then
-            return $docker_exit_status
-        else
-            exit $docker_exit_status
-        fi
-    fi
+    cleanup
 }
 export -f run_embark
 
