@@ -45,8 +45,8 @@ run_embark () {
     # do not alter indentation, tabs in lines below
     do
         local include_var=$(cat <<- ENV_VAR
-	if [[ -n $env_var && -v $env_var ]]; then
-	    run_opts=( "${run_opts[@]}" "-e" "$env_var" )
+	if [[ -v $env_var ]]; then
+	    run_opts=( "\${run_opts[@]}" "-e" "\$env_var" )
 	fi
 	ENV_VAR
         )
