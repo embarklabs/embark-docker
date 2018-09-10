@@ -1,6 +1,8 @@
-function Run-Embark {
+#requires -version 3.0
 
-    function Assign-Value( [parameter( Mandatory = $false )] [string] $Var, $Default) {
+function Start-Embark {
+
+    function Set-Value( [parameter( Mandatory = $false )] [string] $Var, $Default) {
         begin{
             if(-not ($Var)) {
                 $Var = $Default
@@ -12,14 +14,14 @@ function Run-Embark {
         end{}
     }
 
-    $EMBARK_DOCKER_MOUNT_SOURCE = Assign-Value $Env:EMBARK_DOCKER_MOUNT_SOURCE $pwd
-    $EMBARK_DOCKER_MOUNT_TARGET = Assign-Value $Env:EMBARK_DOCKER_MOUNT_TARGET "/dapp"
+    $EMBARK_DOCKER_MOUNT_SOURCE = Set-Value $Env:EMBARK_DOCKER_MOUNT_SOURCE $pwd
+    $EMBARK_DOCKER_MOUNT_TARGET = Set-Value $Env:EMBARK_DOCKER_MOUNT_TARGET "/dapp"
     $EMBARK_DOCKER_RUN = $Env:EMBARK_DOCKER_RUN
-    $EMBARK_DOCKER_IMAGE = Assign-Value $Env:EMBARK_DOCKER_IMAGE "statusim/embark"
-    $EMBARK_DOCKER_RUN_INTERACTIVE = Assign-Value $Env:EMBARK_DOCKER_RUN_INTERACTIVE $false
-    $EMBARK_DOCKER_RUN_OPTS_REPLACE = Assign-Value $Env:EMBARK_DOCKER_RUN_OPTS_REPLACE $false
-    $EMBARK_DOCKER_RUN_RM = Assign-Value $Env:EMBARK_DOCKER_RUN_RM $true
-    $EMBARK_DOCKER_TAG = Assign-Value $Env:EMBARK_DOCKER_TAG "latest"
+    $EMBARK_DOCKER_IMAGE = Set-Value $Env:EMBARK_DOCKER_IMAGE "statusim/embark"
+    $EMBARK_DOCKER_RUN_INTERACTIVE = Set-Value $Env:EMBARK_DOCKER_RUN_INTERACTIVE $false
+    $EMBARK_DOCKER_RUN_OPTS_REPLACE = Set-Value $Env:EMBARK_DOCKER_RUN_OPTS_REPLACE $false
+    $EMBARK_DOCKER_RUN_RM = Set-Value $Env:EMBARK_DOCKER_RUN_RM $true
+    $EMBARK_DOCKER_TAG = Set-Value $Env:EMBARK_DOCKER_TAG "latest"
 
     $run_opts = @(
         "-i",
@@ -60,28 +62,32 @@ function Run-Embark {
 
     function Cleanup {
         $retval = $lastexitcode
-        Remove-Item -Path Function:\Check-Docker
+        Remove-Item -Path Function:\Confirm-Docker
         Remove-Item -Path Function:\Cleanup
         return $retval
     }
 
-    function Check-Docker () {
+    function Confirm-Docker () {
         if (-not (Get-Command docker -errorAction SilentlyContinue)) {
-            "Error: the command \`docker\` must be in a path on \$PATH or aliased"
+            "Error: the command ``docker`` must be in a path on `$PATH or aliased"
             return 127
         }
     }
 
-    Check-Docker
+    Confirm-Docker
+
+    if (-not($?)) {
+        return Cleanup
+    }
 
     $had_run_opts = $false
     $_run_opts = @()
     $_cmd = @()
     $cmd = @()
 
-    $i = 1
+    $i = 0
     while ($args[$i]) {
-        if ($args[$i] -eq "--") {
+        if ($args[$i] -eq "---") {
             $had_run_opts = $true
         }
         else {
@@ -109,62 +115,40 @@ function Run-Embark {
     }
 
     if (-not ($EMBARK_DOCKER_RUN)) {
-        switch ($cmd[0]) {
-            "-V" {}
-            "--version" {}
-            "-h" {}
-            "--help" {}
-            "new" {}
-            "demo" {}
-            "build" {}
-            "run" {}
-            "blockchain" {}
-            "simulator" {}
-            "test" {}
-            "reset" {}
-            "graph" {}
-            "upload" {}
-            "version" {
-                $cmd = "embark" + $cmd
-                break
-            }
+        if ($cmd[0] -cin @("-V", "--version", "-h", "--help", "new", "demo", "build", "run", "blockchain", 
+            "simulator", "test", "reset", "graph", "upload", "version")) {
+            $cmd = "embark " + $cmd
         }
     }
     else {
         $i_flag = ""
-        if ($EMBARK_DOCKER_RUN_INTERACTIVE = $true) {
+        if ($EMBARK_DOCKER_RUN_INTERACTIVE -eq $true) {
             $i_flag = "i"
         }
 
         $run_script = Get-Content $EMBARK_DOCKER_RUN
-        "${cmd}"
-        $run_script = "
-    exec bash -${i_flag}s `$(tty) ${cmd} << 'RUN'
-	__tty=`$1
-	shift
-	script=/tmp/run_embark_script
-	cat << 'SCRIPT' > `$script
-	$run_script
-	SCRIPT
-	chmod +x `$script
-	exec `$script `$@ < `$__tty
-	RUN
-        "
+        $run_script = $run_script -join "`n"
+        $run_script = "exec bash -${i_flag}s `$(tty) ${cmd} << 'RUN'
+__tty=`$1
+shift
+script=/tmp/run_embark_script
+cat << 'SCRIPT' > `$script
+$run_script
+SCRIPT
+chmod +x `$script
+exec `$script `$@ < `$__tty
+RUN"
         $cmd = ("bash", "-${i_flag}c", "$run_script")
     }
 
-    $opts = @()
+    $opts = $run_opts + "${EMBARK_DOCKER_IMAGE}:${EMBARK_DOCKER_TAG}" + $cmd
 
-    if ($cmd) {
-        $opts = $run_opts + "${EMBARK_DOCKER_IMAGE}:${EMBARK_DOCKER_TAG}" + $cmd
-    }
-    else {
-        $opts = $run_opts + "${EMBARK_DOCKER_IMAGE}:${EMBARK_DOCKER_TAG}"
-    }
+    "docker run $opts"
 
-    docker run $opts
-
-    Cleanup
+    return Cleanup
 }
 
-Run-Embark
+
+if ($MyInvocation.InvocationName.EndsWith($MyInvocation.MyCommand.Name)) {
+    Start-Embark @args
+}
