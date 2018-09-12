@@ -60,10 +60,14 @@ function Start-Embark {
         $run_opts = $run_opts + "--rm"
     }
 
+    $OldErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+
     function Cleanup {
         $retval = $lastexitcode
         Remove-Item -Path Function:\Confirm-Docker
         Remove-Item -Path Function:\Cleanup
+        $ErrorActionPreference = $OldErrorActionPreference
         return $retval
     }
 
@@ -143,7 +147,7 @@ RUN"
 
     $opts = $run_opts + "${EMBARK_DOCKER_IMAGE}:${EMBARK_DOCKER_TAG}" + $cmd
 
-    "docker run $opts"
+    docker run $opts
 
     return Cleanup
 }
