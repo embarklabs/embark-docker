@@ -121,7 +121,7 @@ function Start-Embark {
     if (-not ($EMBARK_DOCKER_RUN)) {
         if ($cmd[0] -cin @("-V", "--version", "-h", "--help", "new", "demo", "build", "run", "blockchain", 
             "simulator", "test", "reset", "graph", "upload", "version")) {
-            $cmd = "embark " + $cmd
+            $cmd = @("embark") + $cmd
         }
     }
     else {
@@ -131,7 +131,10 @@ function Start-Embark {
         }
 
         $run_script = Get-Content $EMBARK_DOCKER_RUN
-        $run_script = $run_script -join "`n"
+
+        # " doesn't directly get passed to the container so has to be replaced by \"
+        $run_script = $run_script -join "`n" -replace '"', '\"'
+
         $run_script = "exec bash -${i_flag}s `$(tty) ${cmd} << 'RUN'
 __tty=`$1
 shift
