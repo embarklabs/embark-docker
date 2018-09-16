@@ -52,36 +52,41 @@ function Start-Embark {
 
     foreach ($env_var in "LANG", "LANGUAGE", "LC_ALL", "TERM") {
         if (Test-Path "Env:$env_var") {
-            $run_opts = $run_opts + "-e" + "$env_var"
+            $run_opts = $run_opts + @("-e", "$env_var")
         }
     }
 
     if ($EMBARK_DOCKER_RUN_RM -eq $true) {
-        $run_opts = $run_opts + "--rm"
+        $run_opts = $run_opts + @("--rm")
     }
 
     $OldErrorActionPreference = $ErrorActionPreference
+
+    # 'Continue' - Preference for printing errors and continuing the execution in case of non-terminating errors.
     $ErrorActionPreference = 'Continue'
 
-    function Cleanup {
-        $retval = $lastexitcode
+    function Cleanup ( [parameter( Mandatory = $false )] [int] $RetVal) {
+        Remove-Item -Path Function:\Set-Value
         Remove-Item -Path Function:\Confirm-Docker
         Remove-Item -Path Function:\Cleanup
         $ErrorActionPreference = $OldErrorActionPreference
-        return $retval
+        $Global:LASTEXITCODE = $RetVal
+        return
     }
 
     function Confirm-Docker () {
         if (-not (Get-Command docker -errorAction SilentlyContinue)) {
-            "Error: the command ``docker`` must be in a path on `$PATH or aliased"
+            Write-Host "Error: " -ForegroundColor Red -NoNewline
+            Write-Host "the command ``docker`` must be in a path on `$PATH or aliased"
             return 127
         }
+        return 0
     }
 
-    Confirm-Docker
+    $docker_return_code = Confirm-Docker
 
-    if (-not($?)) {
-        return Cleanup
+    if ($docker_return_code) {
+        return Cleanup -RetVal $docker_return_code
     }
 
     $had_run_opts = $false
@@ -132,9 +137,10 @@ function Start-Embark {
 
         $run_script = Get-Content $EMBARK_DOCKER_RUN
 
-        # " doesn't directly get passed to the container so has to be replaced by \"
+        # " doesn't get passed to the container so has to be replaced by \"
         $run_script = $run_script -join "`n" -replace '"', '\"'
 
+        # do not alter indentation, tabs in lines below
         $run_script = "exec bash -${i_flag}s `$(tty) ${cmd} << 'RUN'
 __tty=`$1
 shift
@@ -145,6 +151,8 @@ SCRIPT
 chmod +x `$script
 exec `$script `$@ < `$__tty
 RUN"
+        # do not alter indentation, tabs in lines above
+
         $cmd = ("bash", "-${i_flag}c", "$run_script")
     }
 
@@ -152,10 +160,15 @@ RUN"
 
     docker run $opts
 
+    if (-not $?) {
+        return Cleanup -RetVal 1
+    }
+
     return Cleanup
 }
 
 
+# Invokes Start-Embark only if the source is this script.
 if ($MyInvocation.InvocationName.EndsWith($MyInvocation.MyCommand.Name)) {
     Start-Embark @args
 }
