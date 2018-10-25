@@ -6,7 +6,6 @@ ARG BASHIT_VERSION=10-aug-2018
 ARG BUILDER_BASE_IMAGE=buildpack-deps
 ARG BUILDER_BASE_TAG=stretch
 ARG EMBARK_VERSION=latest
-ARG GANACHE_VERSION=6.1.0
 ARG GETH_VERSION=1.8.12-37685930
 ARG IPFS_VERSION=0.4.17
 ARG MICRO_VERSION=1.4.1
@@ -126,7 +125,6 @@ RUN git clone --branch ${BASHIT_VERSION} \
     && . .local/nodeenv/default/bin/activate \
     && npm install -g "npm@${NPM_VERSION}" \
     && npm install -g "embark@${EMBARK_VERSION}" \
-                      "ganache-cli@${GANACHE_VERSION}" \
     && ipfs init \
     && ipfs config --json Addresses.API '"/ip4/0.0.0.0/tcp/5001"' \
     && ipfs config --json Addresses.Gateway '"/ip4/0.0.0.0/tcp/8080"' \
