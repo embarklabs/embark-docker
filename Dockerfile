@@ -2,19 +2,19 @@ ARG __CODESET=UTF-8
 ARG __LANG=en_US.${__CODESET}
 ARG __LANGUAGE=en_US:en
 ARG __LC_ALL=en_US.${__CODESET}
-ARG BASHIT_VERSION=10-aug-2018
+ARG BASHIT_VERSION=25-oct-2018
 ARG BUILDER_BASE_IMAGE=buildpack-deps
 ARG BUILDER_BASE_TAG=stretch
 ARG EMBARK_VERSION=latest
-ARG GANACHE_VERSION=6.1.0
-ARG GETH_VERSION=1.8.12-37685930
+ARG GETH_VERSION=1.8.17-8bbe7207
 ARG IPFS_VERSION=0.4.17
 ARG MICRO_VERSION=1.4.1
-ARG NODE_VERSION=8.11.4
+ARG NODE_VERSION=8.12.0
 ARG NODEENV_VERSION=1.3.2
-ARG NPM_VERSION=6.4.0
+ARG NPM_VERSION=6.4.1
 ARG NVM_VERSION=0.33.11
 ARG SUEXEC_VERSION=0.2
+ARG SWARM_VERSION=0.3.5-8bbe7207
 
 # multi-stage builder images
 # ------------------------------------------------------------------------------
@@ -82,6 +82,16 @@ RUN git clone --branch v${SUEXEC_VERSION} \
     && cd su-exec \
     && make
 
+# ------------------------------------------------------------------------------
+
+FROM builder-base as builder-swarm
+ARG SWARM_VERSION
+RUN export url="https://gethstore.blob.core.windows.net/builds" \
+    && export platform="swarm-linux-amd64" \
+    && curl -fsSLO --compressed "${url}/${platform}-${SWARM_VERSION}.tar.gz" \
+    && tar -xvzf swarm* \
+    && rm swarm*/COPYING
+
 # final image
 # ------------------------------------------------------------------------------
 
@@ -126,7 +136,6 @@ RUN git clone --branch ${BASHIT_VERSION} \
     && . .local/nodeenv/default/bin/activate \
     && npm install -g "npm@${NPM_VERSION}" \
     && npm install -g "embark@${EMBARK_VERSION}" \
-                      "ganache-cli@${GANACHE_VERSION}" \
     && ipfs init \
     && ipfs config --json Addresses.API '"/ip4/0.0.0.0/tcp/5001"' \
     && ipfs config --json Addresses.Gateway '"/ip4/0.0.0.0/tcp/8080"' \
@@ -143,6 +152,7 @@ ARG GETH_VERSION
 ARG IPFS_VERSION
 ARG MICRO_VERSION
 ARG SUEXEC_VERSION
+ARG SWARM_VERSION
 ENV __CODESET=${__CODESET} \
     __LANG=${__LANG} \
     __LANGUAGE=${__LANGUAGE} \
@@ -157,7 +167,8 @@ ENV __CODESET=${__CODESET} \
     MICRO_VERSION=${MICRO_VERSION} \
     NODEENV_VERSION=${NODEENV_VERSION} \
     NVM_VERSION=${NVM_VERSION} \
-    SUEXEC_VERSION=${SUEXEC_VERSION}
+    SUEXEC_VERSION=${SUEXEC_VERSION} \
+    SWARM_VERSION=${SWARM_VERSION}
 SHELL ["/bin/sh", "-c"]
 USER root
 WORKDIR /dapp
@@ -172,6 +183,7 @@ EXPOSE 5001 8000 8080 8500 8545 8546 8555 8556 30301/udp 30303
 COPY --from=builder-geth /geth-alltools* /usr/local/bin/
 COPY --from=builder-micro /micro*/micro /usr/local/bin/
 COPY --from=builder-suexec /su-exec/su-exec /usr/local/bin/
+COPY --from=builder-swarm /swarm* /usr/local/bin/
 COPY env/docker-entrypoint.sh \
      env/user-entrypoint.sh \
      env/install-extras.sh \
