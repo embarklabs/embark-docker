@@ -1,7 +1,8 @@
 ARG __CODESET=UTF-8
-ARG __LANG=en_US.${__CODESET}
-ARG __LANGUAGE=en_US:en
-ARG __LC_ALL=en_US.${__CODESET}
+ARG __LANGUAGE=en
+ARG __REGION=US
+ARG __LANG=${__LANGUAGE}_${__REGION}.${__CODESET}
+ARG __LC_ALL=${__LANG}
 ARG BASHIT_VERSION=10-aug-2018
 ARG BUILDER_BASE_IMAGE=buildpack-deps
 ARG BUILDER_BASE_TAG=stretch
@@ -19,6 +20,31 @@ ARG SUEXEC_VERSION=0.2
 # multi-stage builder images
 # ------------------------------------------------------------------------------
 
+FROM node:10.9.0-stretch as locales
+# take the package specifier for embark_version and use `npm pack` to retrieve
+# a tarball, unpack, and then process json file in embark that gives the
+# supported locales and the default; use `npx json ...` to process into two
+# files that can be easily read by bash; copy those files into builder-base
+# (remaining steps are in the next builder image) and loop over the list of
+# locales in the 'supported' file using the sed technique to uncomment in
+# /etc/locale.gen, then run `dpkg-reconfigure locales`; in a later step use the
+# info in the 'default' file as argumets for `update-locale` (unless builder
+# args are defined, see below); the reason to prefer doing this w/ a node
+# builder image vs. downloadig jq into builder-base (deleting jq at the end) is
+# that `npm pack` is best suited to handling an EMBARK_VERSION value that could
+# be any valid npm package specifier; once this is in place, probably still
+# want to keep the __LANG (and related) builder args, but get rid of the
+# default values, only do the sed step for them if they're defined; rather than
+# setting ENV LANG, may prefer to do similar in docker-entrypoint based on the
+# value in 'default' file (would need to copy it over), but only if it's not
+# already defined, e.g. by it being forwarded with `docker run -e`, as run.sh
+# does
+
+# TODO make the nodez theme prettier by changing the color of the = and ver
+# numbers to match the blue color used to report PWD
+
+# ------------------------------------------------------------------------------
+
 FROM ${BUILDER_BASE_IMAGE}:${BUILDER_BASE_TAG} as builder-base
 ARG __CODESET
 ARG __LANG
@@ -32,7 +58,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && sed -i \
            -e "s/# ${__LANG} ${__CODESET}/${__LANG} ${__CODESET}/" \
            /etc/locale.gen \
-    && locale-gen --purge "${__LANG}" \
     && dpkg-reconfigure locales \
     && update-locale LANG=${__LANG} LANGUAGE=${__LANGUAGE} LC_ALL=${__LC_ALL} \
     && unset DEBIAN_FRONTEND \
