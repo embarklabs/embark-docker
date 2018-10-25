@@ -8,7 +8,7 @@ run_embark () {
     local EMBARK_DOCKER_RUN_INTERACTIVE=${EMBARK_DOCKER_RUN_INTERACTIVE:-false}
     local EMBARK_DOCKER_RUN_OPTS_REPLACE=${EMBARK_DOCKER_RUN_OPTS_REPLACE:-false}
     local EMBARK_DOCKER_RUN_RM=${EMBARK_DOCKER_RUN_RM:-true}
-    local EMBARK_DOCKER_TAG="${EMBARK_DOCKER_TAG:-3.1.10}"
+    local EMBARK_DOCKER_TAG="${EMBARK_DOCKER_TAG:-3.2.3}"
 
     local -a run_opts=(
         "-i"

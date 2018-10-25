@@ -21,7 +21,7 @@ function Start-Embark {
     $EMBARK_DOCKER_RUN_INTERACTIVE = Set-Value $Env:EMBARK_DOCKER_RUN_INTERACTIVE $false
     $EMBARK_DOCKER_RUN_OPTS_REPLACE = Set-Value $Env:EMBARK_DOCKER_RUN_OPTS_REPLACE $false
     $EMBARK_DOCKER_RUN_RM = Set-Value $Env:EMBARK_DOCKER_RUN_RM $true
-    $EMBARK_DOCKER_TAG = Set-Value $Env:EMBARK_DOCKER_TAG "latest"
+    $EMBARK_DOCKER_TAG = Set-Value $Env:EMBARK_DOCKER_TAG "3.2.3"
 
     $run_opts = @(
         "-i",
