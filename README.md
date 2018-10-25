@@ -13,6 +13,8 @@ run_embark
 Note that the `run_embark demo` command will create an `embark_demo` directory in
 the docker host's `$PWD`.
 
+Note if you're a macOS user and see `ERROR: this script requires Bash version >= 4.0`, please follow our [Bash upgrade instructions](./macOS-bash4-upgragde.md).
+
 ## Usage via `run.sh`
 
 [`run.sh`](https://github.com/embark-framework/embark-docker/blob/master/run.sh)
